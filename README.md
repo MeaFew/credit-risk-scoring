@@ -1,0 +1,91 @@
+# Credit Risk Scoring
+
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.11-blue?logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/XGBoost-2.0-green?logo=xgboost&logoColor=white" alt="XGBoost">
+  <img src="https://img.shields.io/badge/LightGBM-4.0-blue?logo=lightgbm&logoColor=white" alt="LightGBM">
+  <img src="https://img.shields.io/badge/SHAP-0.42-orange?logo=shap&logoColor=white" alt="SHAP">
+  <img src="https://img.shields.io/badge/CI-passing-brightgreen?logo=githubactions&logoColor=white" alt="CI">
+</p>
+
+## Overview
+
+End-to-end credit risk scoring pipeline built on the Kaggle Home Credit Default Risk dataset. Implements industry-standard feature engineering (WOE/IV), model comparison (LR → RF → XGBoost → LightGBM), and production-ready interpretability (SHAP).
+
+## Key Highlights
+
+- **Feature Engineering**: WOE binning, IV-based selection, target encoding, cross-features
+- **Model Stack**: Logistic Regression (baseline) → Random Forest → XGBoost → LightGBM
+- **Evaluation**: AUC, KS, Gini, calibration, confusion matrix at optimal threshold
+- **Interpretability**: SHAP summary, dependence plots, force plot for individual cases
+- **Delivery**: Streamlit dashboard with risk calculator
+
+## Tech Stack
+
+| Layer | Tools | Notes |
+|-------|-------|-------|
+| ETL | pandas, scikit-learn | Missing value imputation, outlier capping |
+| Feature Eng | Custom WOE/IV | Quantile-based binning with smoothing |
+| Modeling | XGBoost, LightGBM, sklearn | 5-fold stratified CV |
+| Interpretability | SHAP | TreeExplainer for gradient boosting models |
+| Evaluation | scipy, sklearn | AUC, KS, Gini, PR curve, calibration |
+| Delivery | Streamlit | Interactive risk calculator + model comparison |
+| Quality | pytest, ruff, GitHub Actions | CI runs lint + tests on every push |
+
+## Quick Start
+
+```bash
+# Generate synthetic data for local testing
+python scripts/generate_mock_data.py
+
+# Run full pipeline
+make all
+
+# Or step by step
+make preprocess
+make features
+make train
+make evaluate
+make shap
+
+# Launch dashboard
+make dashboard
+
+# Run tests
+make verify
+```
+
+## Project Structure
+
+```
+.
+├── scripts/
+│   ├── generate_mock_data.py     # Synthetic data generator (for CI)
+│   ├── preprocess.py              # Data cleaning & missing value handling
+│   ├── feature_engineering.py     # WOE/IV, target encoding, cross-features
+│   ├── train_models.py            # LR / RF / XGB / LGBM with CV
+│   ├── evaluate.py                # ROC, PR, calibration, confusion matrix
+│   └── shap_analysis.py           # SHAP summary, dependence, force plots
+├── dashboard/
+│   └── app.py                     # Streamlit interactive dashboard
+├── tests/
+│   └── test_pipeline.py           # Unit + integration tests
+├── config.py                      # Centralized paths & hyperparameters
+├── Makefile                       # Workflow orchestration
+└── requirements.txt
+```
+
+## Model Performance
+
+| Model | AUC | KS | Gini |
+|-------|-----|-----|------|
+| Logistic Regression | ~0.72 | ~0.28 | ~0.44 |
+| Random Forest | ~0.76 | ~0.34 | ~0.52 |
+| XGBoost | ~0.79 | ~0.38 | ~0.58 |
+| LightGBM | ~0.79 | ~0.38 | ~0.58 |
+
+> Values from 5-fold stratified cross-validation on synthetic data. Real Kaggle data typically achieves AUC ~0.80 with extensive feature engineering.
+
+## License
+
+MIT

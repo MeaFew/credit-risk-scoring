@@ -1,0 +1,238 @@
+"""Train and compare multiple credit risk models.
+
+Models:
+- Logistic Regression (baseline, highly interpretable)
+- Random Forest (ensemble, non-linear)
+- XGBoost (gradient boosting, industry standard)
+- LightGBM (gradient boosting, faster training)
+
+Output: trained models + cross-validation results JSON.
+"""
+
+import argparse
+import json
+import sys
+import warnings
+from pathlib import Path
+
+import joblib
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+from sklearn.metrics import roc_auc_score, make_scorer
+import xgboost as xgb
+import lightgbm as lgb
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config import (
+    FEATURES_TEST_CSV,
+    FEATURES_TRAIN_CSV,
+    LGB_PARAMS,
+    MODEL_PATH,
+    MODEL_RESULTS_JSON,
+    MODELS_DIR,
+    RANDOM_STATE,
+    REPORTS_DIR,
+    TARGET_COL,
+    XGB_PARAMS,
+)
+
+warnings.filterwarnings("ignore")
+
+
+def ks_score(y_true, y_proba):
+    """Compute Kolmogorov-Smirnov statistic."""
+    from scipy import stats
+    pos_proba = y_proba[y_true == 1]
+    neg_proba = y_proba[y_true == 0]
+    return stats.ks_2samp(pos_proba, neg_proba).statistic
+
+
+def gini_score(y_true, y_proba):
+    """Gini = 2 * AUC - 1."""
+    return 2 * roc_auc_score(y_true, y_proba) - 1
+
+
+def cross_validate_model(model, X, y, cv=5):
+    """Stratified K-Fold cross-validation with AUC, KS, Gini."""
+    skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=RANDOM_STATE)
+
+    aucs, kss, ginis = [], [], []
+    for train_idx, val_idx in skf.split(X, y):
+        X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+        y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+
+        model.fit(X_train, y_train)
+        y_proba = model.predict_proba(X_val)[:, 1]
+
+        aucs.append(roc_auc_score(y_val, y_proba))
+        kss.append(ks_score(y_val, y_proba))
+        ginis.append(gini_score(y_val, y_proba))
+
+    return {
+        "auc_mean": float(np.mean(aucs)),
+        "auc_std": float(np.std(aucs)),
+        "ks_mean": float(np.mean(kss)),
+        "ks_std": float(np.std(kss)),
+        "gini_mean": float(np.mean(ginis)),
+        "gini_std": float(np.std(ginis)),
+    }
+
+
+def train_logistic_regression(X, y):
+    """Train logistic regression with class weight balancing."""
+    print("Training Logistic Regression ...")
+    model = LogisticRegression(
+        class_weight="balanced",
+        max_iter=1000,
+        random_state=RANDOM_STATE,
+        solver="lbfgs",
+    )
+    return model, cross_validate_model(model, X, y)
+
+
+def train_random_forest(X, y):
+    """Train random forest."""
+    print("Training Random Forest ...")
+    model = RandomForestClassifier(
+        n_estimators=200,
+        max_depth=12,
+        min_samples_leaf=50,
+        class_weight="balanced_subsample",
+        random_state=RANDOM_STATE,
+        n_jobs=-1,
+    )
+    return model, cross_validate_model(model, X, y)
+
+
+def train_xgboost(X, y):
+    """Train XGBoost classifier."""
+    print("Training XGBoost ...")
+    model = xgb.XGBClassifier(
+        **{k: v for k, v in XGB_PARAMS.items() if k not in ("early_stopping_rounds",)}
+    )
+
+    # Manual CV with early stopping
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
+    aucs, kss, ginis = [], [], []
+    for train_idx, val_idx in skf.split(X, y):
+        X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+        y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+
+        model.fit(
+            X_train, y_train,
+            eval_set=[(X_val, y_val)],
+            verbose=False,
+        )
+        y_proba = model.predict_proba(X_val)[:, 1]
+        aucs.append(roc_auc_score(y_val, y_proba))
+        kss.append(ks_score(y_val, y_proba))
+        ginis.append(gini_score(y_val, y_proba))
+
+    metrics = {
+        "auc_mean": float(np.mean(aucs)),
+        "auc_std": float(np.std(aucs)),
+        "ks_mean": float(np.mean(kss)),
+        "ks_std": float(np.std(kss)),
+        "gini_mean": float(np.mean(ginis)),
+        "gini_std": float(np.std(ginis)),
+    }
+    return model, metrics
+
+
+def train_lightgbm(X, y):
+    """Train LightGBM classifier."""
+    print("Training LightGBM ...")
+    model = lgb.LGBMClassifier(
+        **{k: v for k, v in LGB_PARAMS.items() if k not in ("early_stopping_rounds", "verbose")}
+    )
+
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
+    aucs, kss, ginis = [], [], []
+    for train_idx, val_idx in skf.split(X, y):
+        X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+        y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+
+        model.fit(
+            X_train, y_train,
+            eval_set=[(X_val, y_val)],
+        )
+        y_proba = model.predict_proba(X_val)[:, 1]
+        aucs.append(roc_auc_score(y_val, y_proba))
+        kss.append(ks_score(y_val, y_proba))
+        ginis.append(gini_score(y_val, y_proba))
+
+    metrics = {
+        "auc_mean": float(np.mean(aucs)),
+        "auc_std": float(np.std(aucs)),
+        "ks_mean": float(np.mean(kss)),
+        "ks_std": float(np.std(kss)),
+        "gini_mean": float(np.mean(ginis)),
+        "gini_std": float(np.std(ginis)),
+    }
+    return model, metrics
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--train", type=Path, default=FEATURES_TRAIN_CSV)
+    args = parser.parse_args()
+
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    print(f"Loading features from {args.train} ...")
+    df = pd.read_csv(args.train)
+
+    y = df[TARGET_COL]
+    X = df.drop(columns=[TARGET_COL, "SK_ID_CURR"])
+
+    print(f"Features: {X.shape[1]}, Samples: {len(X)}, Default rate: {y.mean()*100:.2f}%\n")
+
+    # Train all models
+    results = {}
+    models = {}
+
+    models["logistic_regression"], results["logistic_regression"] = train_logistic_regression(X, y)
+    models["random_forest"], results["random_forest"] = train_random_forest(X, y)
+    models["xgboost"], results["xgboost"] = train_xgboost(X, y)
+    models["lightgbm"], results["lightgbm"] = train_lightgbm(X, y)
+
+    # Save best model (highest AUC)
+    best_model_name = max(results, key=lambda k: results[k]["auc_mean"])
+    best_model = models[best_model_name]
+    print(f"\nBest model: {best_model_name} (AUC={results[best_model_name]['auc_mean']:.4f})")
+
+    # Save model
+    if hasattr(best_model, "save_model"):
+        best_model.save_model(str(MODEL_PATH))
+    else:
+        joblib.dump(best_model, str(MODEL_PATH.with_suffix(".joblib")))
+
+    # Save results
+    with open(MODEL_RESULTS_JSON, "w") as f:
+        json.dump({
+            "cv_results": results,
+            "best_model": best_model_name,
+            "feature_count": X.shape[1],
+            "sample_count": len(X),
+            "default_rate": float(y.mean()),
+        }, f, indent=2)
+
+    print(f"\nSaved model to {MODEL_PATH}")
+    print(f"Saved results to {MODEL_RESULTS_JSON}")
+
+    # Print summary table
+    print("\n" + "=" * 70)
+    print(f"{'Model':<20} {'AUC':>10} {'KS':>10} {'Gini':>10}")
+    print("=" * 70)
+    for name, metrics in results.items():
+        marker = " *" if name == best_model_name else ""
+        print(f"{name:<20} {metrics['auc_mean']:>10.4f} {metrics['ks_mean']:>10.4f} {metrics['gini_mean']:>10.4f}{marker}")
+    print("=" * 70)
+
+
+if __name__ == "__main__":
+    main()
