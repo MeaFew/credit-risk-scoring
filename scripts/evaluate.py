@@ -191,14 +191,17 @@ def main():
             X_train, y_train, test_size=0.2, random_state=RANDOM_STATE, stratify=y_train
         )
 
-    # Load model
-    if MODEL_PATH.exists():
-        import xgboost as xgb
-        model = xgb.XGBClassifier()
-        model.load_model(str(MODEL_PATH))
-    else:
-        model_path = MODEL_PATH.with_suffix(".joblib")
-        model = joblib.load(str(model_path))
+    # Load best model from CV results
+    with open(MODEL_RESULTS_JSON, "r") as f:
+        results = json.load(f)
+    best_name = results.get("best_model", "xgboost")
+
+    # train_models.py saves all models as .joblib (pickle-compatible)
+    model_path = MODELS_DIR / f"{best_name}_risk_model.joblib"
+    if not model_path.exists():
+        # Fallback to xgboost
+        model_path = MODELS_DIR / "xgboost_risk_model.joblib"
+    model = joblib.load(str(model_path))
 
     # Retrain on full train for evaluation
     print("Retraining on full training set for evaluation ...")

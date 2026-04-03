@@ -42,7 +42,6 @@ def load_model():
 
 def plot_shap_summary(shap_values, X_sample, feature_names, save_path: Path):
     """Generate SHAP beeswarm summary plot."""
-    fig, ax = plt.subplots(figsize=(10, 8))
     shap.summary_plot(
         shap_values,
         X_sample,
@@ -50,6 +49,7 @@ def plot_shap_summary(shap_values, X_sample, feature_names, save_path: Path):
         show=False,
         max_display=20,
     )
+    fig = plt.gcf()  # shap.summary_plot creates its own figure internally
     fig.tight_layout()
     fig.savefig(save_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
