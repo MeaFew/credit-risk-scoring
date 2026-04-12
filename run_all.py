@@ -28,6 +28,7 @@ def main():
         ("Feature Engineering", "python scripts/feature_engineering.py"),
         ("Model Training", "python scripts/train_models.py"),
         ("Evaluation", "python scripts/evaluate.py"),
+        ("SHAP Analysis", "python scripts/shap_analysis.py"),
     ]
 
     print("Credit Risk Scoring — Full Pipeline")

@@ -17,7 +17,7 @@ import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.calibration import CalibratedClassifierCV, calibration_curve
+from sklearn.calibration import calibration_curve
 from sklearn.metrics import (
     auc,
     confusion_matrix,
@@ -219,17 +219,13 @@ def main():
         else:
             raise FileNotFoundError(f"No model file found in {MODELS_DIR}")
 
-    if model_path.suffix == ".json":
+    if best_name == "xgboost" and model_path.suffix == ".json":
         import xgboost as xgb
         model = xgb.XGBClassifier()
         model.load_model(str(model_path))
     else:
         model = joblib.load(str(model_path))
     print(f"Loaded model from {model_path}")
-
-    # Retrain on full train for evaluation
-    print("Retraining on full training set for evaluation ...")
-    model.fit(X_train, y_train)
 
     metrics = evaluate_model(model, X_test, y_test)
 

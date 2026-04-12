@@ -59,7 +59,11 @@ def load_model():
     if not json_path.exists() and not joblib_path.exists():
         st.error("Model file not found. Run `make train` first.")
         st.stop()
-    if json_path.exists():
+    # Read best model name to choose loader
+    with open(MODEL_RESULTS_JSON, "r") as f:
+        results = json.load(f)
+    best_name = results.get("best_model", "xgboost")
+    if best_name == "xgboost" and json_path.exists():
         import xgboost as xgb
         model = xgb.XGBClassifier()
         model.load_model(str(json_path))
@@ -162,8 +166,8 @@ def main():
         st.header("Score Distribution")
 
         model = load_model()
-        X_test = test_df.drop(columns=[TARGET_COL, "SK_ID_CURR"])
-        y_test = test_df[TARGET_COL]
+        X_test = train_df.drop(columns=["SK_ID_CURR"])
+        y_test = train_df[TARGET_COL]
         y_proba = model.predict_proba(X_test)[:, 1]
 
         fig = go.Figure()
@@ -236,7 +240,7 @@ def main():
 
         # Use a random test case as default
         sample_idx = st.number_input("Sample Index", 0, len(test_df) - 1, 0)
-        sample = test_df.iloc[sample_idx].drop(labels=[TARGET_COL, "SK_ID_CURR"])
+        sample = test_df.iloc[sample_idx].drop(labels=[TARGET_COL, "SK_ID_CURR"], errors='ignore')
 
         user_input = {}
         cols = st.columns(3)

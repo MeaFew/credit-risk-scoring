@@ -7,6 +7,7 @@ Generates:
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -22,6 +23,8 @@ from config import (
     FEATURES_TRAIN_CSV,
     IMAGES_DIR,
     MODEL_PATH,
+    MODEL_RESULTS_JSON,
+    RANDOM_STATE,
     REPORTS_DIR,
     SHAP_SUMMARY_PNG,
     TARGET_COL,
@@ -30,9 +33,14 @@ from config import (
 
 def load_model():
     """Load the best trained model, auto-detecting file format."""
+    # Read best model name from results
+    with open(MODEL_RESULTS_JSON, "r") as f:
+        results = json.load(f)
+    best_name = results.get("best_model", "xgboost")
+
     json_path = MODEL_PATH.with_suffix(".json")
     joblib_path = MODEL_PATH.with_suffix(".joblib")
-    if json_path.exists():
+    if best_name == "xgboost" and json_path.exists():
         import xgboost as xgb
         model = xgb.XGBClassifier()
         model.load_model(str(json_path))
@@ -114,7 +122,7 @@ def main():
     model.fit(X_train, y_train)
 
     # Sample for SHAP computation (too slow on full data)
-    X_sample = X_train.sample(n=min(args.sample, len(X_train)), random_state=42)
+    X_sample = X_train.sample(n=min(args.sample, len(X_train)), random_state=RANDOM_STATE)
 
     print(f"Computing SHAP values on {len(X_sample)} training samples ...")
     explainer = shap.TreeExplainer(model)
