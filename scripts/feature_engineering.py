@@ -30,9 +30,6 @@ from config import (
     WOE_MAX_BINS,
 )
 
-warnings.filterwarnings("ignore")
-
-
 def compute_woe_iv(df: pd.DataFrame, feature: str, target: str, n_bins: int = WOE_MAX_BINS) -> tuple[pd.DataFrame, float]:
     """Compute WOE and IV for a single numeric feature using quantile binning.
 
@@ -80,8 +77,8 @@ def compute_iv_all(df: pd.DataFrame, numeric_cols: list[str], target: str = TARG
         try:
             _, iv = compute_woe_iv(df, col, target)
             results.append({"feature": col, "iv": iv})
-        except (ValueError, KeyError, IndexError):
-            warnings.warn(f"IV computation skipped for {col}")
+        except (ValueError, KeyError, IndexError) as e:
+            warnings.warn(f"IV computation failed for {col}: {e}", RuntimeWarning)
             results.append({"feature": col, "iv": 0.0})
     return pd.DataFrame(results).sort_values("iv", ascending=False)
 
@@ -147,7 +144,7 @@ def build_features(train_df: pd.DataFrame, test_df: pd.DataFrame) -> tuple[pd.Da
         combined[f"{col}_TE"] = combined[col].map(mapping).fillna(global_mean)
 
     # One-hot for low-cardinality
-    low_card = [c for c in cat_cols if combined[c].nunique() <= 5]
+    low_card = [c for c in cat_cols if train[c].nunique() <= 5]
     remaining_cat = [c for c in cat_cols if c not in low_card]
     if low_card:
         combined = pd.get_dummies(combined, columns=low_card, drop_first=True)

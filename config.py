@@ -22,7 +22,7 @@ CLEANED_TRAIN_CSV = PROCESSED_DATA_DIR / "application_train_cleaned.csv"
 CLEANED_TEST_CSV = PROCESSED_DATA_DIR / "application_test_cleaned.csv"
 FEATURES_TRAIN_CSV = PROCESSED_DATA_DIR / "features_train.csv"
 FEATURES_TEST_CSV = PROCESSED_DATA_DIR / "features_test.csv"
-MODEL_PATH = MODELS_DIR / "best_risk_model"  # stem (no extension); use with .json or .joblib
+MODEL_PATH = MODELS_DIR / "xgb_risk_model"  # stem (no extension); use with .json or .joblib
 MODEL_RESULTS_JSON = REPORTS_DIR / "model_results.json"
 SHAP_SUMMARY_PNG = IMAGES_DIR / "shap_summary.png"
 
@@ -42,13 +42,14 @@ RANDOM_STATE = 42
 
 # ── Feature engineering ───────────────────────────────────────────
 # WOE binning
-WOE_MIN_SAMPLES = 0.05  # (reserved for future use) minimum bin size as fraction of total
+WOE_MIN_SAMPLES = 0.05  # Not currently used — planned for future WOE implementation
 WOE_MAX_BINS = 10
 
 # IV threshold for feature selection
 IV_THRESHOLD = 0.02  # features with IV < 0.02 are considered weak
 
 # PSI threshold for stability monitoring
+PSI_THRESHOLD = 0.1  # Population Stability Index threshold for monitoring
 
 # ── Model hyperparameters (tuned via Optuna in practice) ──────────
 XGB_PARAMS = {

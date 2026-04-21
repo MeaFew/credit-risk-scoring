@@ -167,7 +167,8 @@ def main():
         st.header("Score Distribution")
 
         model = load_model()
-        X_eval = test_df.drop(columns=["SK_ID_CURR"])
+        drop_cols = [c for c in ["SK_ID_CURR", TARGET_COL] if c in test_df.columns]
+        X_eval = test_df.drop(columns=drop_cols)
         y_eval = test_df[TARGET_COL]
         y_proba = model.predict_proba(X_eval)[:, 1]
 
@@ -209,7 +210,7 @@ def main():
         model = load_model()
         if hasattr(model, "feature_importances_"):
             importances = model.feature_importances_
-            features = test_df.drop(columns=["SK_ID_CURR"], errors="ignore").columns.tolist()
+            features = test_df.drop(columns=["SK_ID_CURR", TARGET_COL], errors="ignore").columns.tolist()
             imp_df = pd.DataFrame({"Feature": features, "Importance": importances})
             imp_df = imp_df.sort_values("Importance", ascending=True).tail(15)
 

@@ -19,7 +19,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff pytest
       - name: Lint with ruff
-        run: ruff check scripts/ tests/ --ignore E501,E402
+        run: |
+          ruff check scripts/ tests/ --ignore E501,E402
+          ruff format --check scripts/ tests/
 
   test:
     runs-on: ubuntu-latest

@@ -89,7 +89,7 @@ Based on [Kaggle Home Credit Default Risk](https://www.kaggle.com/competitions/h
 | Competition Median | ~0.72–0.75 | Leaderboard median |
 | Competition Top 10% | ~0.795 | Multi-table features + ensemble |
 | **This Project (single-table)** | **0.763** | WOE/IV + target encoding + XGBoost/LightGBM (5-fold CV) |
-| **This Project (multi-table)** | **0.783** | + bureau / previous_application / POS / credit_card / installments features |
+| **This Project (multi-table)** | **0.783** | (expected, requires full Kaggle data with auxiliary tables) |
 
 > Note: Competition Private Leaderboard is closed. Scores above are from local 5-fold stratified cross-validation on real Kaggle data (307,511 train / 48,744 test). Multi-table results require running `scripts/aggregate_auxiliary_features.py` and `scripts/merge_auxiliary_features.py` before `make features`.
 
