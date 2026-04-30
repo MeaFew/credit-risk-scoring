@@ -1,5 +1,3 @@
-# Credit Risk Scoring
-
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.11-blue?logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/XGBoost-2.0-green?logo=xgboost&logoColor=white" alt="XGBoost">
@@ -8,18 +6,14 @@
   <a href="https://github.com/MeaFew/credit-risk-scoring/actions"><img src="https://github.com/MeaFew/credit-risk-scoring/workflows/CI/badge.svg" alt="CI"></a>
 </p>
 
-<p align="center">
-  <b>中文</b> | <a href="./README.en.md">English</a>
-</p>
-
 ## Overview
 
-End-to-end credit risk scoring pipeline built on the Kaggle Home Credit Default Risk dataset. Implements industry-standard feature engineering (WOE/IV), model comparison (LR → RF → XGBoost → LightGBM), and production-ready interpretability (SHAP).
+End-to-end credit risk scoring pipeline built on the Kaggle Home Credit Default Risk dataset. Implements industry-standard feature engineering (WOE/IV), model comparison (LR -> RF -> XGBoost -> LightGBM), and production-ready interpretability (SHAP).
 
 ## Key Highlights
 
 - **Feature Engineering**: WOE binning, IV-based selection, target encoding, cross-features
-- **Model Stack**: Logistic Regression (baseline) → Random Forest → XGBoost → LightGBM
+- **Model Stack**: Logistic Regression (baseline) -> Random Forest -> XGBoost -> LightGBM
 - **Evaluation**: AUC, KS, Gini, calibration, confusion matrix at optimal threshold
 - **Interpretability**: SHAP summary, dependence plots, force plot for individual cases
 - **Delivery**: Streamlit dashboard with risk calculator
@@ -93,7 +87,7 @@ Based on [Kaggle Home Credit Default Risk](https://www.kaggle.com/competitions/h
 | Kaggle Starter Baseline | 0.688 | Official starter notebook, no feature engineering |
 | Single-table Logistic Regression | 0.748 | `application_train` only + GridSearchCV |
 | Single-table LightGBM | 0.749 | Same as above, gradient boosting |
-| Competition Median | ~0.72–0.75 | Leaderboard median |
+| Competition Median | ~0.72-0.75 | Leaderboard median |
 | Competition Top 10% | ~0.795 | Multi-table features + ensemble |
 | **This Project (single-table)** | **0.763** | WOE/IV + target encoding + XGBoost/LightGBM (5-fold CV) |
 | **This Project (multi-table)** | **0.783** | (expected, requires full Kaggle data with auxiliary tables) |
@@ -111,13 +105,13 @@ Based on [Kaggle Home Credit Default Risk](https://www.kaggle.com/competitions/h
 
 > Values from 5-fold stratified cross-validation on real Kaggle data with single-table features (application_train only). Hold-out test set AUC = **0.766** (LightGBM). Multi-table features (bureau, previous_application, etc.) can push AUC to **0.783** by running the auxiliary aggregation scripts.
 
-## 相关项目
+## Related Projects
 
-| 项目 | 仓库 | 简介 |
-|------|------|------|
-| 电商用户行为分析 | [MeaFew/ecommerce-user-analytics](https://github.com/MeaFew/ecommerce-user-analytics) | 2,900万条真实用户行为数据，10大分析模块 |
-| 营销归因与预算优化 | [MeaFew/marketing-attribution-mmm](https://github.com/MeaFew/marketing-attribution-mmm) | MMM + 多触点归因 + 预算优化 |
-| 多元时序预测 | [MeaFew/multivariate-timeseries-forecasting](https://github.com/MeaFew/multivariate-timeseries-forecasting) | LSTM / Transformer / XGBoost 时序预测对比 |
+| Project | Repo | Description |
+|---------|------|-------------|
+| E-commerce User Analytics | [MeaFew/ecommerce-user-analytics](https://github.com/MeaFew/ecommerce-user-analytics) | 29M real user behavior records, 10 analytical modules |
+| Marketing Attribution & MMM | [MeaFew/marketing-attribution-mmm](https://github.com/MeaFew/marketing-attribution-mmm) | MMM + multi-touch attribution + budget optimization |
+| Multivariate Time Series | [MeaFew/multivariate-timeseries-forecasting](https://github.com/MeaFew/multivariate-timeseries-forecasting) | LSTM / Transformer / XGBoost time series forecasting |
 
 ## License
 
