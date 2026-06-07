@@ -247,7 +247,7 @@ def main():
             unsafe_allow_html=True,
         )
         st.markdown(
-            f"<p style='text-align: center;'>Predicted default probability</p>",
+            "<p style='text-align: center;'>Predicted default probability</p>",
             unsafe_allow_html=True,
         )
 

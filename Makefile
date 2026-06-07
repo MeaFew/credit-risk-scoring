@@ -1,9 +1,9 @@
-.PHONY: all setup preprocess features train evaluate dashboard verify clean
+.PHONY: all setup preprocess features train evaluate shap dashboard verify clean
 
 PYTHON := python
 
 # ── One-shot pipeline ─────────────────────────────────────────────
-all: preprocess features train evaluate
+all: preprocess features train evaluate shap
 
 # ── Environment ───────────────────────────────────────────────────
 setup:
