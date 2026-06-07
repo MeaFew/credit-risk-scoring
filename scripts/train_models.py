@@ -21,7 +21,7 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold, cross_val_score
-from sklearn.metrics import roc_auc_score, make_scorer
+from sklearn.metrics import roc_auc_score
 import xgboost as xgb
 import lightgbm as lgb
 
@@ -35,6 +35,7 @@ from config import (
     MODELS_DIR,
     RANDOM_STATE,
     REPORTS_DIR,
+    RF_PARAMS,
     TARGET_COL,
     XGB_PARAMS,
 )
@@ -96,14 +97,7 @@ def train_logistic_regression(X, y):
 def train_random_forest(X, y):
     """Train random forest."""
     print("Training Random Forest ...")
-    model = RandomForestClassifier(
-        n_estimators=200,
-        max_depth=12,
-        min_samples_leaf=50,
-        class_weight="balanced_subsample",
-        random_state=RANDOM_STATE,
-        n_jobs=-1,
-    )
+    model = RandomForestClassifier(**RF_PARAMS)
     return model, cross_validate_model(model, X, y)
 
 
@@ -207,7 +201,7 @@ def main():
 
     # Recreate model from scratch, then fit on full data
     if best_model_name == "logistic_regression":
-        best_model = LogisticRegression(max_iter=1000, random_state=RANDOM_STATE)
+        best_model = LogisticRegression(max_iter=1000, class_weight="balanced", random_state=RANDOM_STATE)
         best_model.fit(X, y)
     elif best_model_name == "random_forest":
         best_model = RandomForestClassifier(**RF_PARAMS)

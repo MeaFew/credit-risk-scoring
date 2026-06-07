@@ -17,7 +17,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import (
@@ -30,7 +29,6 @@ from config import (
     RANDOM_STATE,
     TARGET_COL,
     WOE_MAX_BINS,
-    WOE_MIN_SAMPLES,
 )
 
 warnings.filterwarnings("ignore")
@@ -73,11 +71,12 @@ def compute_woe_iv(df: pd.DataFrame, feature: str, target: str, n_bins: int = WO
     return grouped[["woe", "iv"]], iv
 
 
-def apply_woe(df: pd.DataFrame, feature: str, woe_map: pd.DataFrame) -> pd.Series:
-    """Apply pre-computed WOE mapping to a feature.
+def identity_transform(df: pd.DataFrame, feature: str, woe_map: pd.DataFrame) -> pd.Series:
+    """Placeholder: returns raw feature values unchanged.
 
-    Currently returns raw values — WOE is most useful for logistic regression;
-    tree-based models (XGBoost/LightGBM) handle non-linear relationships natively.
+    WOE encoding is most useful for logistic regression models.
+    Tree-based models (XGBoost/LightGBM) handle non-linear relationships
+    natively, so WOE transform is skipped for now.
     """
     return df[feature]
 

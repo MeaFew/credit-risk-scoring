@@ -45,7 +45,7 @@ RANDOM_STATE = 42
 
 # ── Feature engineering ───────────────────────────────────────────
 # WOE binning
-WOE_MIN_SAMPLES = 0.05  # minimum bin size as fraction of total
+WOE_MIN_SAMPLES = 0.05  # (reserved for future use) minimum bin size as fraction of total
 WOE_MAX_BINS = 10
 
 # IV threshold for feature selection
@@ -84,4 +84,13 @@ LGB_PARAMS = {
     "n_estimators": 500,
     "early_stopping_rounds": 50,
     "verbose": -1,
+}
+
+RF_PARAMS = {
+    "n_estimators": 200,
+    "max_depth": 12,
+    "min_samples_leaf": 50,
+    "class_weight": "balanced_subsample",
+    "random_state": RANDOM_STATE,
+    "n_jobs": -1,
 }
