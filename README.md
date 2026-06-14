@@ -1,10 +1,10 @@
-# Credit Risk Scoring
+# 信用风险评分
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.11-blue?logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/XGBoost-2.0-green?logo=xgboost&logoColor=white" alt="XGBoost">
   <img src="https://img.shields.io/badge/LightGBM-4.0-blue?logo=lightgbm&logoColor=white" alt="LightGBM">
-  <img src="https://img.shields.io/badge/SHAP-0.42-orange" alt="SHAP">
+  <img src="https://img.shields.io/badge/SHAP-0.42-orange?logo=shap&logoColor=white" alt="SHAP">
   <a href="https://github.com/MeaFew/credit-risk-scoring/actions"><img src="https://github.com/MeaFew/credit-risk-scoring/workflows/CI/badge.svg" alt="CI"></a>
 </p>
 
@@ -17,31 +17,31 @@
   <b>中文</b> | <a href="./README.en.md">English</a>
 </p>
 
-## Overview
+## 项目简介
 
-End-to-end credit risk scoring pipeline built on the Kaggle Home Credit Default Risk dataset. Implements industry-standard feature engineering (WOE/IV), model comparison (LR → RF → XGBoost → LightGBM), and production-ready interpretability (SHAP).
+基于 Kaggle Home Credit Default Risk 数据集的端到端信用风险评分管线。实现工业级特征工程（WOE/IV）、多模型对比（LR → RF → XGBoost → LightGBM）与生产级可解释性（SHAP）。
 
-## Key Highlights
+## 核心亮点
 
-- **Feature Engineering**: WOE binning, IV-based selection, target encoding, cross-features
-- **Model Stack**: Logistic Regression (baseline) → Random Forest → XGBoost → LightGBM
-- **Evaluation**: AUC, KS, Gini, calibration, confusion matrix at optimal threshold
-- **Interpretability**: SHAP summary, dependence plots, force plot for individual cases
-- **Delivery**: Streamlit dashboard with risk calculator
+- **特征工程**：WOE 分箱、IV 筛选、目标编码、交叉特征
+- **模型栈**：逻辑回归（基线）→ 随机森林 → XGBoost → LightGBM
+- **评估**：AUC、KS、Gini、校准曲线、最优阈值下的混淆矩阵
+- **可解释性**：SHAP summary、dependence plot、个体 force plot
+- **交付**：Streamlit 风险计算器看板
 
-## Tech Stack
+## 技术栈
 
-| Layer | Tools | Notes |
-|-------|-------|-------|
-| ETL | pandas, scikit-learn | Missing value imputation, outlier capping |
-| Feature Eng | Custom WOE/IV | Quantile-based binning with smoothing |
-| Modeling | XGBoost, LightGBM, sklearn | 5-fold stratified CV |
-| Interpretability | SHAP | TreeExplainer for gradient boosting models |
-| Evaluation | scipy, sklearn | AUC, KS, Gini, PR curve, calibration |
-| Delivery | Streamlit | Interactive risk calculator + model comparison |
-| Quality | pytest, ruff, GitHub Actions | CI runs lint + tests on every push |
+| 层级 | 工具 | 说明 |
+|------|------|------|
+| ETL | pandas, scikit-learn | 缺失值填补、异常值截断 |
+| 特征工程 | 自研 WOE/IV | 分位数分箱 + 平滑处理 |
+| 建模 | XGBoost, LightGBM, sklearn | 5 折分层交叉验证 |
+| 可解释性 | SHAP | 梯度提升模型使用 TreeExplainer |
+| 评估 | scipy, sklearn | AUC、KS、Gini、PR 曲线、校准 |
+| 交付 | Streamlit | 交互式风险计算器 + 模型对比 |
+| 质量保障 | pytest, ruff, GitHub Actions | CI 每次 push 跑 lint + 测试 |
 
-## Quick Start
+## 快速开始
 
 ```bash
 # 从 Gitee 克隆（国内推荐，速度更快）
@@ -51,74 +51,74 @@ git clone https://gitee.com/zeroonei1/credit-risk-scoring.git
 git clone https://github.com/MeaFew/credit-risk-scoring.git
 cd credit-risk-scoring
 
-# Download real dataset (GitHub Releases, ~40MB)
+# 下载真实数据集（GitHub Releases，约 40MB）
 bash download_data.sh
 
-# Run full pipeline
+# 运行完整管线
 make all
 
-# Or step by step
+# 或分步执行
 make preprocess
 make features
 make train
 make evaluate
 make shap
 
-# Launch dashboard
+# 启动看板
 make dashboard
 
-# Quality gates
+# 质量门
 make verify
 ```
 
-## Project Structure
+## 项目结构
 
 ```
 .
 ├── scripts/
-│   ├── generate_mock_data.py     # Synthetic data generator (for CI)
-│   ├── preprocess.py              # Data cleaning & missing value handling
-│   ├── feature_engineering.py     # WOE/IV, target encoding, cross-features
-│   ├── train_models.py            # LR / RF / XGB / LGBM with CV
-│   ├── evaluate.py                # ROC, PR, calibration, confusion matrix
-│   └── shap_analysis.py           # SHAP summary, dependence, force plots
+│   ├── generate_mock_data.py     # 合成数据生成（CI 用）
+│   ├── preprocess.py              # 数据清洗与缺失值处理
+│   ├── feature_engineering.py     # WOE/IV、目标编码、交叉特征
+│   ├── train_models.py            # LR / RF / XGB / LGBM + 交叉验证
+│   ├── evaluate.py                # ROC、PR、校准、混淆矩阵
+│   └── shap_analysis.py           # SHAP summary、dependence、force plot
 ├── dashboard/
-│   └── app.py                     # Streamlit interactive dashboard
+│   └── app.py                     # Streamlit 交互看板
 ├── tests/
-│   └── test_pipeline.py           # Unit + integration tests
-├── config.py                      # Centralized paths & hyperparameters
-├── Makefile                       # Workflow orchestration
+│   └── test_pipeline.py           # 单元 + 集成测试
+├── config.py                      # 集中式路径与超参数配置
+├── Makefile                       # 工作流编排
 └── requirements.txt
 ```
 
-## Model Performance
+## 模型表现
 
-### Benchmark
+### 基准参照
 
-Based on [Kaggle Home Credit Default Risk](https://www.kaggle.com/competitions/home-credit-default-risk) (7,190+ teams, metric: AUC-ROC).
+基于 [Kaggle Home Credit Default Risk](https://www.kaggle.com/competitions/home-credit-default-risk)（7,190+ 队伍，评估指标：AUC-ROC）。
 
-| Reference | AUC | Notes |
-|-----------|-----|-------|
-| Kaggle Starter Baseline | 0.688 | Official starter notebook, no feature engineering |
-| Single-table Logistic Regression | 0.748 | `application_train` only + GridSearchCV |
-| Single-table LightGBM | 0.749 | Same as above, gradient boosting |
-| Competition Median | ~0.72–0.75 | Leaderboard median |
-| Competition Top 10% | ~0.795 | Multi-table features + ensemble |
-| **This Project (single-table)** | **0.763** | WOE/IV + target encoding + XGBoost/LightGBM (5-fold CV) |
-| **This Project (multi-table)** | **0.783** | (expected, requires full Kaggle data with auxiliary tables) |
+| 参照 | AUC | 说明 |
+|------|-----|------|
+| Kaggle Starter 基线 | 0.688 | 官方 starter notebook，无特征工程 |
+| 单表逻辑回归 | 0.748 | 仅 `application_train` + GridSearchCV |
+| 单表 LightGBM | 0.749 | 同上，梯度提升 |
+| 竞赛中位数 | ~0.72–0.75 | Leaderboard 中位 |
+| 竞赛 Top 10% | ~0.795 | 多表特征 + 集成 |
+| **本方案（单表）** | **0.763** | WOE/IV + 目标编码 + XGBoost/LightGBM（5 折 CV） |
+| **本方案（多表）** | **0.783** | （预期值，需完整 Kaggle 辅助表数据） |
 
-> Note: Competition Private Leaderboard is closed. Scores above are from local 5-fold stratified cross-validation on real Kaggle data (307,511 train / 48,744 test). Multi-table results require running `scripts/aggregate_auxiliary_features.py` and `scripts/merge_auxiliary_features.py` before `make features`.
+> 注：竞赛 Private Leaderboard 已关闭。上述分数为真实 Kaggle 数据上的本地 5 折分层交叉验证（307,511 训练 / 48,744 测试）。多表结果需在 `make features` 前运行 `scripts/aggregate_auxiliary_features.py` 和 `scripts/merge_auxiliary_features.py`。
 
-### Results
+### 结果
 
-| Model | AUC | KS | Gini |
-|-------|-----|-----|------|
-| Logistic Regression | 0.634 | 0.205 | 0.268 |
-| Random Forest | 0.745 | 0.366 | 0.490 |
+| 模型 | AUC | KS | Gini |
+|------|-----|-----|------|
+| 逻辑回归 | 0.634 | 0.205 | 0.268 |
+| 随机森林 | 0.745 | 0.366 | 0.490 |
 | XGBoost | **0.762** | **0.394** | **0.525** |
 | LightGBM | **0.763** | **0.394** | **0.526** |
 
-> Values from 5-fold stratified cross-validation on real Kaggle data with single-table features (application_train only). Hold-out test set AUC = **0.766** (LightGBM). Multi-table features (bureau, previous_application, etc.) can push AUC to **0.783** by running the auxiliary aggregation scripts.
+> 数值来自单表特征（仅 application_train）的真实 Kaggle 数据 5 折分层交叉验证。留出测试集 AUC = **0.766**（LightGBM）。引入多表特征（bureau、previous_application 等）可通过运行辅助聚合脚本将 AUC 提升至 **0.783**。
 
 ## 相关项目
 
@@ -128,6 +128,6 @@ Based on [Kaggle Home Credit Default Risk](https://www.kaggle.com/competitions/h
 | 营销归因与预算优化 | [Gitee](https://gitee.com/zeroonei1/marketing-attribution-mmm) | [GitHub](https://github.com/MeaFew/marketing-attribution-mmm) |
 | 多元时序预测 | [Gitee](https://gitee.com/zeroonei1/multivariate-timeseries-forecasting) | [GitHub](https://github.com/MeaFew/multivariate-timeseries-forecasting) |
 
-## License
+## 许可证
 
 MIT
