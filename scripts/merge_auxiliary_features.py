@@ -43,6 +43,7 @@ def merge_aux_features():
     # Save atomically via temp files to avoid corruption on mid-write failure
     import os
     import tempfile
+
     for path, df in [(train_path, train_merged), (test_path, test_merged)]:
         fd, tmp = tempfile.mkstemp(suffix=".csv", prefix="features_", dir=path.parent)
         os.close(fd)

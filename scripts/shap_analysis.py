@@ -34,7 +34,7 @@ from config import (
 def load_model():
     """Load the best trained model, auto-detecting file format."""
     # Read best model name from results
-    with open(MODEL_RESULTS_JSON, "r") as f:
+    with open(MODEL_RESULTS_JSON) as f:
         results = json.load(f)
     best_name = results.get("best_model", "xgboost")
 
@@ -42,6 +42,7 @@ def load_model():
     joblib_path = MODEL_PATH.with_suffix(".joblib")
     if best_name == "xgboost" and json_path.exists():
         import xgboost as xgb
+
         model = xgb.XGBClassifier()
         model.load_model(str(json_path))
         return model
@@ -55,6 +56,7 @@ def load_model():
             # Only attempt XGBoost native loading for .json if best_model is xgboost
             if best_name == "xgboost" and p.suffix == ".json":
                 import xgboost as xgb
+
                 model = xgb.XGBClassifier()
                 model.load_model(str(p))
                 return model
@@ -110,7 +112,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--train", type=Path, default=FEATURES_TRAIN_CSV)
     parser.add_argument("--test", type=Path, default=FEATURES_TEST_CSV)
-    parser.add_argument("--sample", type=int, default=1000, help="Number of samples for SHAP computation")
+    parser.add_argument(
+        "--sample", type=int, default=1000, help="Number of samples for SHAP computation"
+    )
     args = parser.parse_args()
 
     print("Loading data ...")
@@ -142,7 +146,9 @@ def main():
 
     # Top features bar chart
     print("Generating feature importance plot ...")
-    top_features = plot_top_features(shap_values, X_sample, feature_names, top_n=10, save_dir=IMAGES_DIR)
+    top_features = plot_top_features(
+        shap_values, X_sample, feature_names, top_n=10, save_dir=IMAGES_DIR
+    )
 
     # Dependence plots for top 3 features
     print("Generating dependence plots ...")
@@ -157,7 +163,7 @@ def main():
             ax=ax,
         )
         fig.tight_layout()
-        save_path = IMAGES_DIR / f"shap_dependence_{i+1}_{feat[:30]}.png"
+        save_path = IMAGES_DIR / f"shap_dependence_{i + 1}_{feat[:30]}.png"
         fig.savefig(save_path, dpi=150, bbox_inches="tight")
         plt.close(fig)
         print(f"Saved dependence plot: {save_path}")
@@ -165,7 +171,9 @@ def main():
     # Force plot for a single high-risk case
     print("Generating force plot for single case ...")
     shap_force = shap.force_plot(
-        explainer.expected_value[1] if isinstance(explainer.expected_value, list) else explainer.expected_value,
+        explainer.expected_value[1]
+        if isinstance(explainer.expected_value, list)
+        else explainer.expected_value,
         shap_values[0],
         X_sample.iloc[0],
         feature_names=feature_names,

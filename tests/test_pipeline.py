@@ -8,9 +8,14 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import TARGET_COL
-from scripts.generate_mock_data import generate_application_train
-from scripts.preprocess import cap_outliers, handle_missing_categorical, handle_missing_numeric, preprocess
 from scripts.feature_engineering import build_features, compute_woe_iv
+from scripts.generate_mock_data import generate_application_train
+from scripts.preprocess import (
+    cap_outliers,
+    handle_missing_categorical,
+    handle_missing_numeric,
+    preprocess,
+)
 
 
 @pytest.fixture
@@ -123,9 +128,17 @@ class TestFeatureOutputValidity:
         train_clean, test_clean = preprocess(mock_train_df, mock_test_df)
 
         key_cols = [
-            c for c in ["AMT_CREDIT", "AMT_INCOME_TOTAL", "AMT_ANNUITY",
-                         "DAYS_BIRTH", "DAYS_EMPLOYED", "EXT_SOURCE_1",
-                         "EXT_SOURCE_2", "EXT_SOURCE_3"]
+            c
+            for c in [
+                "AMT_CREDIT",
+                "AMT_INCOME_TOTAL",
+                "AMT_ANNUITY",
+                "DAYS_BIRTH",
+                "DAYS_EMPLOYED",
+                "EXT_SOURCE_1",
+                "EXT_SOURCE_2",
+                "EXT_SOURCE_3",
+            ]
             if c in train_clean.columns
         ]
 

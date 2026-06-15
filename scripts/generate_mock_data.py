@@ -15,7 +15,7 @@ import pandas as pd
 from sklearn.datasets import make_classification
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import RAW_DATA_DIR, RANDOM_STATE
+from config import RANDOM_STATE, RAW_DATA_DIR
 
 
 def generate_application_train(n_rows: int = 30000, seed: int = RANDOM_STATE) -> pd.DataFrame:
@@ -70,7 +70,13 @@ def generate_application_train(n_rows: int = 30000, seed: int = RANDOM_STATE) ->
         p=[0.55, 0.08, 0.2, 0.15, 0.02],
     )
     df["NAME_EDUCATION_TYPE"] = rng.choice(
-        ["Secondary / secondary special", "Higher education", "Incomplete higher", "Lower secondary", "Academic degree"],
+        [
+            "Secondary / secondary special",
+            "Higher education",
+            "Incomplete higher",
+            "Lower secondary",
+            "Academic degree",
+        ],
         n_rows,
         p=[0.7, 0.2, 0.06, 0.03, 0.01],
     )
@@ -80,20 +86,61 @@ def generate_application_train(n_rows: int = 30000, seed: int = RANDOM_STATE) ->
         p=[0.6, 0.2, 0.1, 0.07, 0.03],
     )
     df["NAME_HOUSING_TYPE"] = rng.choice(
-        ["House / apartment", "With parents", "Municipal apartment", "Rented apartment", "Office apartment", "Co-op apartment"],
+        [
+            "House / apartment",
+            "With parents",
+            "Municipal apartment",
+            "Rented apartment",
+            "Office apartment",
+            "Co-op apartment",
+        ],
         n_rows,
         p=[0.9, 0.05, 0.02, 0.02, 0.005, 0.005],
     )
     df["OCCUPATION_TYPE"] = rng.choice(
         [
-            "Laborers", "Sales staff", "Core staff", "Managers", "Drivers",
-            "High skill tech staff", "Accountants", "Medicine staff", "Security staff",
-            "Cooking staff", "Cleaning staff", "Private service staff", "Low-skill Laborers",
-            "Waiters/barmen staff", "Secretaries", "Realty agents", "HR staff", "IT staff",
+            "Laborers",
+            "Sales staff",
+            "Core staff",
+            "Managers",
+            "Drivers",
+            "High skill tech staff",
+            "Accountants",
+            "Medicine staff",
+            "Security staff",
+            "Cooking staff",
+            "Cleaning staff",
+            "Private service staff",
+            "Low-skill Laborers",
+            "Waiters/barmen staff",
+            "Secretaries",
+            "Realty agents",
+            "HR staff",
+            "IT staff",
             np.nan,
         ],
         n_rows,
-        p=[0.15, 0.10, 0.10, 0.08, 0.07, 0.06, 0.05, 0.05, 0.05, 0.04, 0.04, 0.03, 0.03, 0.03, 0.02, 0.02, 0.02, 0.02, 0.04],
+        p=[
+            0.15,
+            0.10,
+            0.10,
+            0.08,
+            0.07,
+            0.06,
+            0.05,
+            0.05,
+            0.05,
+            0.04,
+            0.04,
+            0.03,
+            0.03,
+            0.03,
+            0.02,
+            0.02,
+            0.02,
+            0.02,
+            0.04,
+        ],
     )
     df["WEEKDAY_APPR_PROCESS_START"] = rng.choice(
         ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
@@ -101,8 +148,14 @@ def generate_application_train(n_rows: int = 30000, seed: int = RANDOM_STATE) ->
     )
     df["ORGANIZATION_TYPE"] = rng.choice(
         [
-            "Business Entity Type 3", "Business Entity Type 2", "Self-employed",
-            "Government", "Medicine", "Education", "Other", np.nan,
+            "Business Entity Type 3",
+            "Business Entity Type 2",
+            "Self-employed",
+            "Government",
+            "Medicine",
+            "Education",
+            "Other",
+            np.nan,
         ],
         n_rows,
         p=[0.3, 0.2, 0.15, 0.1, 0.1, 0.08, 0.05, 0.02],
@@ -147,7 +200,9 @@ def main():
     train_df.to_csv(train_path, index=False)
     test_df.to_csv(test_path, index=False)
 
-    print(f"Generated: {train_path} ({len(train_df):,} rows, {train_df['TARGET'].mean()*100:.2f}% default rate)")
+    print(
+        f"Generated: {train_path} ({len(train_df):,} rows, {train_df['TARGET'].mean() * 100:.2f}% default rate)"
+    )
     print(f"Generated: {test_path} ({len(test_df):,} rows)")
 
 

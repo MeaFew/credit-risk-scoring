@@ -14,7 +14,6 @@ from pathlib import Path
 import joblib
 import pandas as pd
 
-
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import (
     FEATURES_TEST_CSV,
@@ -83,7 +82,7 @@ def main():
     if not readme_table:
         print("  SKIP: Could not parse model table from README.md")
     else:
-        with open(MODEL_RESULTS_JSON, "r") as f:
+        with open(MODEL_RESULTS_JSON) as f:
             results = json.load(f)
         cv_results = results.get("cv_results", {})
 
@@ -100,9 +99,6 @@ def main():
                 continue
 
             actual = cv_results[model_name]
-            actual_auc = round(actual["auc_mean"], 3)
-            actual_ks = round(actual["ks_mean"], 3)
-            actual_gini = round(actual["gini_mean"], 3)
 
             for metric in ("auc", "ks", "gini"):
                 actual_val = round(actual[f"{metric}_mean"], 3)
@@ -134,6 +130,7 @@ def main():
             actual_path = joblib_path if joblib_path.exists() else json_path
             if actual_path.suffix == ".json":
                 import xgboost as xgb
+
                 model = xgb.XGBClassifier()
                 model.load_model(str(actual_path))
             else:
@@ -156,11 +153,11 @@ def main():
     print("=== Check 3: Feature files existence and column counts ===")
     train_exists = FEATURES_TRAIN_CSV.exists()
     test_exists = FEATURES_TEST_CSV.exists()
-    if check(train_exists, f"features_train.csv exists"):
+    if check(train_exists, "features_train.csv exists"):
         passed += 1
     else:
         failed += 1
-    if check(test_exists, f"features_test.csv exists"):
+    if check(test_exists, "features_test.csv exists"):
         passed += 1
     else:
         failed += 1
@@ -180,7 +177,7 @@ def main():
             failed += 1
 
         # Check against model_results.json feature_count
-        with open(MODEL_RESULTS_JSON, "r") as f:
+        with open(MODEL_RESULTS_JSON) as f:
             results = json.load(f)
         expected_features = results.get("feature_count")
         if expected_features is not None:
@@ -197,7 +194,7 @@ def main():
 
     # ── Summary ────────────────────────────────────────────────────
     total = passed + failed
-    print(f"\n{'='*40}")
+    print(f"\n{'=' * 40}")
     print(f"Results: {passed}/{total} passed, {failed} failed")
     if failed > 0:
         print("ACTION: Update README.md or pipeline to resolve mismatches.")

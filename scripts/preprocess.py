@@ -36,7 +36,9 @@ def load_data(train_path: Path, test_path: Path) -> tuple[pd.DataFrame, pd.DataF
     return train_df, test_df
 
 
-def cap_outliers(df: pd.DataFrame, numeric_cols: list[str], lower_q: float = 0.001, upper_q: float = 0.999) -> pd.DataFrame:
+def cap_outliers(
+    df: pd.DataFrame, numeric_cols: list[str], lower_q: float = 0.001, upper_q: float = 0.999
+) -> pd.DataFrame:
     """Cap extreme outliers at given quantiles."""
     df = df.copy()
     for col in numeric_cols:
@@ -126,7 +128,7 @@ def main():
 
     print(f"\nSaved: {CLEANED_TRAIN_CSV} ({train_clean.shape})")
     print(f"Saved: {CLEANED_TEST_CSV} ({test_clean.shape})")
-    print(f"Default rate: {train_clean[TARGET_COL].mean()*100:.2f}%")
+    print(f"Default rate: {train_clean[TARGET_COL].mean() * 100:.2f}%")
 
 
 if __name__ == "__main__":

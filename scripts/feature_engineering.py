@@ -30,7 +30,10 @@ from config import (
     WOE_MAX_BINS,
 )
 
-def compute_woe_iv(df: pd.DataFrame, feature: str, target: str, n_bins: int = WOE_MAX_BINS) -> tuple[pd.DataFrame, float]:
+
+def compute_woe_iv(
+    df: pd.DataFrame, feature: str, target: str, n_bins: int = WOE_MAX_BINS
+) -> tuple[pd.DataFrame, float]:
     """Compute WOE and IV for a single numeric feature using quantile binning.
 
     Returns:
@@ -67,8 +70,9 @@ def compute_woe_iv(df: pd.DataFrame, feature: str, target: str, n_bins: int = WO
     return grouped[["woe", "iv"]], iv
 
 
-
-def compute_iv_all(df: pd.DataFrame, numeric_cols: list[str], target: str = TARGET_COL) -> pd.DataFrame:
+def compute_iv_all(
+    df: pd.DataFrame, numeric_cols: list[str], target: str = TARGET_COL
+) -> pd.DataFrame:
     """Compute IV for all numeric features."""
     results = []
     for col in numeric_cols:
@@ -83,7 +87,9 @@ def compute_iv_all(df: pd.DataFrame, numeric_cols: list[str], target: str = TARG
     return pd.DataFrame(results).sort_values("iv", ascending=False)
 
 
-def build_features(train_df: pd.DataFrame, test_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+def build_features(
+    train_df: pd.DataFrame, test_df: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Full feature engineering pipeline."""
     print("Building features ...")
 
@@ -120,7 +126,7 @@ def build_features(train_df: pd.DataFrame, test_df: pd.DataFrame) -> tuple[pd.Da
     if len(ext_cols) >= 2:
         print(f"  Creating EXT_SOURCE interactions ({len(ext_cols)} sources) ...")
         for i, c1 in enumerate(ext_cols):
-            for c2 in ext_cols[i + 1:]:
+            for c2 in ext_cols[i + 1 :]:
                 train[f"{c1}_x_{c2}"] = train[c1] * train[c2]
                 test[f"{c1}_x_{c2}"] = test[c1] * test[c2]
             train[f"{c1}_squared"] = train[c1] ** 2
@@ -138,8 +144,14 @@ def build_features(train_df: pd.DataFrame, test_df: pd.DataFrame) -> tuple[pd.Da
         # Target encoding with smoothing
         global_mean = y.mean()
         smoothing = 10.0
-        agg = pd.DataFrame({col: train[col], TARGET_COL: y}).groupby(col)[TARGET_COL].agg(["mean", "count"])
-        agg["smooth"] = (agg["mean"] * agg["count"] + global_mean * smoothing) / (agg["count"] + smoothing)
+        agg = (
+            pd.DataFrame({col: train[col], TARGET_COL: y})
+            .groupby(col)[TARGET_COL]
+            .agg(["mean", "count"])
+        )
+        agg["smooth"] = (agg["mean"] * agg["count"] + global_mean * smoothing) / (
+            agg["count"] + smoothing
+        )
         mapping = agg["smooth"].to_dict()
         combined[f"{col}_TE"] = combined[col].map(mapping).fillna(global_mean)
 
@@ -162,7 +174,9 @@ def build_features(train_df: pd.DataFrame, test_df: pd.DataFrame) -> tuple[pd.Da
 
     iv_df = compute_iv_all(combined_train, numeric_cols, TARGET_COL)
     selected_features = iv_df[iv_df["iv"] >= IV_THRESHOLD]["feature"].tolist()
-    print(f"  Selected {len(selected_features)} / {len(numeric_cols)} features (IV >= {IV_THRESHOLD})")
+    print(
+        f"  Selected {len(selected_features)} / {len(numeric_cols)} features (IV >= {IV_THRESHOLD})"
+    )
     print(f"  Top 5 by IV: {iv_df.head(5).to_dict('records')}")
 
     # Keep SK_ID_CURR + selected + target

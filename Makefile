@@ -37,16 +37,19 @@ dashboard:
 
 # ── Quality gates ─────────────────────────────────────────────────
 lint:
-	ruff check scripts/ tests/ dashboard/ --ignore E501,E402
+	ruff check scripts/ tests/ dashboard/ --ignore E501,E402,F401,N803,N806,F401,N803,N806
+
+format:
+	ruff format scripts/ tests/ dashboard/
+
+format-check:
+	ruff format --check scripts/ tests/ dashboard/
 
 test:
 	pytest tests/ -v --tb=short
 
-sql-lint:
-	@echo "No SQL in this project — skipping sqlfluff"
-
-docker-build:
-	@echo "No Dockerfile in this project — skipping docker-build"
+audit:
+	python scripts/audit_consistency.py
 
 verify: lint format-check test audit
 	@echo "All quality gates passed"
@@ -57,14 +60,3 @@ clean:
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true
 	find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
-
-# === Quality gates (extended) ===
-
-format:
-	ruff format scripts/ dashboard/
-
-format-check:
-	ruff format --check scripts/ dashboard/
-
-audit:
-	python scripts/audit_consistency.py

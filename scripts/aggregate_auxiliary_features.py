@@ -18,7 +18,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import RAW_DATA_DIR, PROCESSED_DATA_DIR
+from config import PROCESSED_DATA_DIR, RAW_DATA_DIR
 
 
 def aggregate_bureau(df: pd.DataFrame) -> pd.DataFrame:
@@ -49,11 +49,17 @@ def aggregate_bureau_balance(df: pd.DataFrame, bureau_df: pd.DataFrame) -> pd.Da
     status_counts = df.groupby("SK_ID_BUREAU")["STATUS"].value_counts().unstack(fill_value=0)
     status_counts["bureau_bal_total_months"] = status_counts.sum(axis=1)
     # C = closed, X = unknown, 0 = no DPD, 1-5 = DPD buckets
-    status_counts["bureau_bal_closed_ratio"] = status_counts.get("C", 0) / status_counts["bureau_bal_total_months"]
-    status_counts["bureau_bal_no_dpd_ratio"] = status_counts.get("0", 0) / status_counts["bureau_bal_total_months"]
+    status_counts["bureau_bal_closed_ratio"] = (
+        status_counts.get("C", 0) / status_counts["bureau_bal_total_months"]
+    )
+    status_counts["bureau_bal_no_dpd_ratio"] = (
+        status_counts.get("0", 0) / status_counts["bureau_bal_total_months"]
+    )
     # Any overdue (status 1-5)
     overdue_cols = [c for c in status_counts.columns if c in "12345"]
-    status_counts["bureau_bal_overdue_ratio"] = status_counts[overdue_cols].sum(axis=1) / status_counts["bureau_bal_total_months"]
+    status_counts["bureau_bal_overdue_ratio"] = (
+        status_counts[overdue_cols].sum(axis=1) / status_counts["bureau_bal_total_months"]
+    )
     status_counts = status_counts.reset_index()
 
     # Merge with bureau to get SK_ID_CURR
@@ -74,7 +80,9 @@ def aggregate_previous_application(df: pd.DataFrame) -> pd.DataFrame:
     grp = df.groupby("SK_ID_CURR")
     agg = pd.DataFrame()
     agg["prev_app_count"] = grp.size()
-    agg["prev_app_approved_count"] = grp.apply(lambda x: (x["NAME_CONTRACT_STATUS"] == "Approved").sum())
+    agg["prev_app_approved_count"] = grp.apply(
+        lambda x: (x["NAME_CONTRACT_STATUS"] == "Approved").sum()
+    )
     agg["prev_app_approved_ratio"] = agg["prev_app_approved_count"] / agg["prev_app_count"]
     agg["prev_app_avg_annuity"] = grp["AMT_ANNUITY"].mean()
     agg["prev_app_sum_annuity"] = grp["AMT_ANNUITY"].sum()
@@ -101,7 +109,9 @@ def aggregate_pos_cash(df: pd.DataFrame) -> pd.DataFrame:
     agg["pos_cash_avg_dpd_def"] = grp["SK_DPD_DEF"].mean()
     agg["pos_cash_avg_instalment"] = grp["CNT_INSTALMENT"].mean()
     agg["pos_cash_avg_instalment_future"] = grp["CNT_INSTALMENT_FUTURE"].mean()
-    agg["pos_cash_active_ratio"] = grp.apply(lambda x: (x["NAME_CONTRACT_STATUS"] == "Active").sum()) / agg["pos_cash_count"]
+    agg["pos_cash_active_ratio"] = (
+        grp.apply(lambda x: (x["NAME_CONTRACT_STATUS"] == "Active").sum()) / agg["pos_cash_count"]
+    )
     return agg.reset_index()
 
 
@@ -122,7 +132,9 @@ def aggregate_credit_card(df: pd.DataFrame) -> pd.DataFrame:
     agg["cc_avg_cnt_drawings_atm"] = grp["CNT_DRAWINGS_ATM_CURRENT"].mean()
     agg["cc_avg_dpd"] = grp["SK_DPD"].mean()
     agg["cc_max_dpd"] = grp["SK_DPD"].max()
-    agg["cc_active_ratio"] = grp.apply(lambda x: (x["NAME_CONTRACT_STATUS"] == "Active").sum()) / agg["cc_count"]
+    agg["cc_active_ratio"] = (
+        grp.apply(lambda x: (x["NAME_CONTRACT_STATUS"] == "Active").sum()) / agg["cc_count"]
+    )
     # Credit utilization
     agg["cc_avg_utilization"] = grp.apply(
         lambda x: (x["AMT_BALANCE"] / (x["AMT_CREDIT_LIMIT_ACTUAL"] + 1)).mean()

@@ -99,8 +99,12 @@ def plot_calibration(y_true, y_proba, save_path: Path):
 def plot_score_distribution(y_true, y_proba, save_path: Path):
     """Plot score distribution by actual class."""
     fig, ax = plt.subplots(figsize=(10, 6))
-    ax.hist(y_proba[y_true == 0], bins=50, alpha=0.6, label="Non-default", density=True, color="#3b82f6")
-    ax.hist(y_proba[y_true == 1], bins=50, alpha=0.6, label="Default", density=True, color="#ef4444")
+    ax.hist(
+        y_proba[y_true == 0], bins=50, alpha=0.6, label="Non-default", density=True, color="#3b82f6"
+    )
+    ax.hist(
+        y_proba[y_true == 1], bins=50, alpha=0.6, label="Default", density=True, color="#ef4444"
+    )
     ax.set_xlabel("Predicted Probability")
     ax.set_ylabel("Density")
     ax.set_title("Score Distribution by Actual Outcome")
@@ -181,12 +185,13 @@ def main():
         # No target in test — split train for evaluation
         print("Test set has no TARGET — splitting train 80/20 for evaluation ...")
         from sklearn.model_selection import train_test_split
+
         X_train, X_test, y_train, y_test = train_test_split(
             X_train, y_train, test_size=0.2, random_state=RANDOM_STATE, stratify=y_train
         )
 
     # Load best model from CV results (read JSON once)
-    with open(MODEL_RESULTS_JSON, "r") as f:
+    with open(MODEL_RESULTS_JSON) as f:
         results = json.load(f)
     best_name = results.get("best_model", "xgboost")
 
@@ -224,6 +229,7 @@ def main():
 
     if best_name == "xgboost" and model_path.suffix == ".json":
         import xgboost as xgb
+
         model = xgb.XGBClassifier()
         model.load_model(str(model_path))
     else:

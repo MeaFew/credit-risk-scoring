@@ -16,14 +16,14 @@ import warnings
 from pathlib import Path
 
 import joblib
+import lightgbm as lgb
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import roc_auc_score
 import xgboost as xgb
-import lightgbm as lgb
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import StratifiedKFold
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import (
@@ -41,7 +41,6 @@ from config import (
 )
 
 warnings.filterwarnings("ignore")
-
 
 
 def gini_score(y_true, y_proba):
@@ -109,7 +108,8 @@ def train_xgboost(X, y):
         y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
 
         model.fit(
-            X_train, y_train,
+            X_train,
+            y_train,
             eval_set=[(X_val, y_val)],
             verbose=False,
         )
@@ -143,7 +143,8 @@ def train_lightgbm(X, y):
         y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
 
         model.fit(
-            X_train, y_train,
+            X_train,
+            y_train,
             eval_set=[(X_val, y_val)],
         )
         y_proba = model.predict_proba(X_val)[:, 1]
@@ -176,7 +177,7 @@ def main():
     y = df[TARGET_COL]
     X = df.drop(columns=[TARGET_COL, "SK_ID_CURR"])
 
-    print(f"Features: {X.shape[1]}, Samples: {len(X)}, Default rate: {y.mean()*100:.2f}%\n")
+    print(f"Features: {X.shape[1]}, Samples: {len(X)}, Default rate: {y.mean() * 100:.2f}%\n")
 
     # Train all models
     results = {}
@@ -194,18 +195,25 @@ def main():
 
     # Recreate model from scratch, then fit on full data
     if best_model_name == "logistic_regression":
-        best_model = LogisticRegression(max_iter=1000, class_weight="balanced", random_state=RANDOM_STATE, solver="lbfgs")
+        best_model = LogisticRegression(
+            max_iter=1000, class_weight="balanced", random_state=RANDOM_STATE, solver="lbfgs"
+        )
         best_model.fit(X, y)
     elif best_model_name == "random_forest":
         best_model = RandomForestClassifier(**RF_PARAMS)
         best_model.fit(X, y)
     elif best_model_name == "xgboost":
-        best_model = xgb.XGBClassifier(**{k: v for k, v in XGB_PARAMS.items() if k != "early_stopping_rounds"})
+        best_model = xgb.XGBClassifier(
+            **{k: v for k, v in XGB_PARAMS.items() if k != "early_stopping_rounds"}
+        )
         best_model.fit(X, y)
     elif best_model_name == "lightgbm":
         from sklearn.model_selection import train_test_split as _tts
+
         X_rt, X_val, y_rt, y_val = _tts(X, y, test_size=0.1, random_state=RANDOM_STATE, stratify=y)
-        best_model = lgb.LGBMClassifier(**{k: v for k, v in LGB_PARAMS.items() if k not in ("early_stopping_rounds", "verbose")})
+        best_model = lgb.LGBMClassifier(
+            **{k: v for k, v in LGB_PARAMS.items() if k not in ("early_stopping_rounds", "verbose")}
+        )
         best_model.fit(X_rt, y_rt, eval_set=[(X_val, y_val)])
     else:
         best_model = models[best_model_name]
@@ -217,13 +225,17 @@ def main():
 
     # Save results
     with open(MODEL_RESULTS_JSON, "w") as f:
-        json.dump({
-            "cv_results": results,
-            "best_model": best_model_name,
-            "feature_count": X.shape[1],
-            "sample_count": len(X),
-            "default_rate": float(y.mean()),
-        }, f, indent=2)
+        json.dump(
+            {
+                "cv_results": results,
+                "best_model": best_model_name,
+                "feature_count": X.shape[1],
+                "sample_count": len(X),
+                "default_rate": float(y.mean()),
+            },
+            f,
+            indent=2,
+        )
 
     print(f"\nSaved model to {MODEL_PATH}")
     print(f"Saved results to {MODEL_RESULTS_JSON}")
@@ -234,7 +246,9 @@ def main():
     print("=" * 70)
     for name, metrics in results.items():
         marker = " *" if name == best_model_name else ""
-        print(f"{name:<20} {metrics['auc_mean']:>10.4f} {metrics['ks_mean']:>10.4f} {metrics['gini_mean']:>10.4f}{marker}")
+        print(
+            f"{name:<20} {metrics['auc_mean']:>10.4f} {metrics['ks_mean']:>10.4f} {metrics['gini_mean']:>10.4f}{marker}"
+        )
     print("=" * 70)
 
 

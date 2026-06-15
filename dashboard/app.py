@@ -25,8 +25,8 @@ from config import (
     FEATURES_TEST_CSV,
     FEATURES_TRAIN_CSV,
     IMAGES_DIR,
-    MODEL_RESULTS_JSON,
     MODEL_PATH,
+    MODEL_RESULTS_JSON,
     TARGET_COL,
 )
 
@@ -47,7 +47,7 @@ def load_data():
     if not MODEL_RESULTS_JSON.exists():
         st.error("Model results not found. Run `make train evaluate` first.")
         st.stop()
-    with open(MODEL_RESULTS_JSON, "r") as f:
+    with open(MODEL_RESULTS_JSON) as f:
         results = json.load(f)
     return train, test, results
 
@@ -60,11 +60,12 @@ def load_model():
         st.error("Model file not found. Run `make train` first.")
         st.stop()
     # Read best model name to choose loader
-    with open(MODEL_RESULTS_JSON, "r") as f:
+    with open(MODEL_RESULTS_JSON) as f:
         results = json.load(f)
     best_name = results.get("best_model", "xgboost")
     if best_name == "xgboost" and json_path.exists():
         import xgboost as xgb
+
         model = xgb.XGBClassifier()
         model.load_model(str(json_path))
         return model
@@ -81,11 +82,19 @@ def main():
     st.sidebar.header("Navigation")
     page = st.sidebar.radio(
         "Select Page",
-        ["Overview", "Model Comparison", "Score Distribution", "Feature Importance", "Risk Calculator"],
+        [
+            "Overview",
+            "Model Comparison",
+            "Score Distribution",
+            "Feature Importance",
+            "Risk Calculator",
+        ],
     )
 
     st.sidebar.markdown("---")
-    st.sidebar.info(f"Train: {len(train_df):,} | Test: {len(test_df):,} | Default rate: {train_df[TARGET_COL].mean()*100:.1f}%")
+    st.sidebar.info(
+        f"Train: {len(train_df):,} | Test: {len(test_df):,} | Default rate: {train_df[TARGET_COL].mean() * 100:.1f}%"
+    )
 
     # ── Overview ───────────────────────────────────────────────────
     if page == "Overview":
@@ -100,7 +109,7 @@ def main():
             metadata_cols = sum(1 for c in ["TARGET", "SK_ID_CURR"] if c in train_df.columns)
             st.metric("Features", train_df.shape[1] - metadata_cols)
         with col4:
-            st.metric("Default Rate", f"{train_df[TARGET_COL].mean()*100:.2f}%")
+            st.metric("Default Rate", f"{train_df[TARGET_COL].mean() * 100:.2f}%")
 
         st.markdown("---")
         st.subheader("Model Performance Summary")
@@ -108,12 +117,14 @@ def main():
         cv = results.get("cv_results", {})
         data = []
         for name, metrics in cv.items():
-            data.append({
-                "Model": name.replace("_", " ").title(),
-                "AUC": f"{metrics['auc_mean']:.4f}",
-                "KS": f"{metrics['ks_mean']:.4f}",
-                "Gini": f"{metrics['gini_mean']:.4f}",
-            })
+            data.append(
+                {
+                    "Model": name.replace("_", " ").title(),
+                    "AUC": f"{metrics['auc_mean']:.4f}",
+                    "KS": f"{metrics['ks_mean']:.4f}",
+                    "Gini": f"{metrics['gini_mean']:.4f}",
+                }
+            )
         st.dataframe(pd.DataFrame(data), use_container_width=True)
 
         st.markdown("---")
@@ -138,12 +149,14 @@ def main():
         errors = [cv[m][metric_key.replace("_mean", "_std")] for m in models]
 
         fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=[m.replace("_", " ").title() for m in models],
-            y=values,
-            error_y=dict(type="data", array=errors, visible=True),
-            marker_color="#3b82f6",
-        ))
+        fig.add_trace(
+            go.Bar(
+                x=[m.replace("_", " ").title() for m in models],
+                y=values,
+                error_y=dict(type="data", array=errors, visible=True),
+                marker_color="#3b82f6",
+            )
+        )
         fig.update_layout(
             title=f"Cross-Validation {metrics_choice}",
             yaxis_title=metrics_choice,
@@ -173,20 +186,24 @@ def main():
         y_proba = model.predict_proba(X_eval)[:, 1]
 
         fig = go.Figure()
-        fig.add_trace(go.Histogram(
-            x=y_proba[y_eval == 0],
-            name="Non-default",
-            opacity=0.7,
-            nbinsx=50,
-            marker_color="#3b82f6",
-        ))
-        fig.add_trace(go.Histogram(
-            x=y_proba[y_eval == 1],
-            name="Default",
-            opacity=0.7,
-            nbinsx=50,
-            marker_color="#ef4444",
-        ))
+        fig.add_trace(
+            go.Histogram(
+                x=y_proba[y_eval == 0],
+                name="Non-default",
+                opacity=0.7,
+                nbinsx=50,
+                marker_color="#3b82f6",
+            )
+        )
+        fig.add_trace(
+            go.Histogram(
+                x=y_proba[y_eval == 1],
+                name="Default",
+                opacity=0.7,
+                nbinsx=50,
+                marker_color="#ef4444",
+            )
+        )
         fig.update_layout(
             barmode="overlay",
             title="Predicted Probability Distribution",
@@ -210,7 +227,9 @@ def main():
         model = load_model()
         if hasattr(model, "feature_importances_"):
             importances = model.feature_importances_
-            features = test_df.drop(columns=["SK_ID_CURR", TARGET_COL], errors="ignore").columns.tolist()
+            features = test_df.drop(
+                columns=["SK_ID_CURR", TARGET_COL], errors="ignore"
+            ).columns.tolist()
             imp_df = pd.DataFrame({"Feature": features, "Importance": importances})
             imp_df = imp_df.sort_values("Importance", ascending=True).tail(15)
 
@@ -245,7 +264,7 @@ def main():
             st.warning("No test data available for risk calculation.")
             st.stop()
         sample_idx = st.number_input("Sample Index", 0, len(test_df) - 1, 0)
-        sample = test_df.iloc[sample_idx].drop(labels=[TARGET_COL, "SK_ID_CURR"], errors='ignore')
+        sample = test_df.iloc[sample_idx].drop(labels=[TARGET_COL, "SK_ID_CURR"], errors="ignore")
 
         user_input = {}
         cols = st.columns(3)
@@ -262,7 +281,7 @@ def main():
 
         color = "#ef4444" if proba > 0.5 else "#f59e0b" if proba > 0.2 else "#10b981"
         st.markdown(
-            f"<h1 style='color: {color}; text-align: center;'>{proba*100:.2f}%</h1>",
+            f"<h1 style='color: {color}; text-align: center;'>{proba * 100:.2f}%</h1>",
             unsafe_allow_html=True,
         )
         st.markdown(
