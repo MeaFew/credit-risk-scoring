@@ -183,7 +183,7 @@ def main():
         X_test = test_df.drop(columns=[TARGET_COL, "SK_ID_CURR"])
     else:
         # No target in test — split train for evaluation
-        print("Test set has no TARGET — splitting train 80/20 for evaluation ...")
+        print("Test set has no TARGET - splitting train 80/20 for evaluation ...")
         from sklearn.model_selection import train_test_split
 
         X_train, X_test, y_train, y_test = train_test_split(

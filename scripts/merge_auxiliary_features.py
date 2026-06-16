@@ -21,15 +21,15 @@ def merge_aux_features():
 
     print("Loading train features ...")
     train_df = pd.read_csv(train_path)
-    print(f"  Train: {len(train_df):,} rows × {len(train_df.columns)} cols")
+    print(f"  Train: {len(train_df):,} rows x {len(train_df.columns)} cols")
 
     print("Loading test features ...")
     test_df = pd.read_csv(test_path)
-    print(f"  Test: {len(test_df):,} rows × {len(test_df.columns)} cols")
+    print(f"  Test: {len(test_df):,} rows x {len(test_df.columns)} cols")
 
     print("Loading auxiliary features ...")
     aux_df = pd.read_csv(aux_path)
-    print(f"  Aux: {len(aux_df):,} rows × {len(aux_df.columns)} cols")
+    print(f"  Aux: {len(aux_df):,} rows x {len(aux_df.columns)} cols")
 
     # Merge
     print("Merging auxiliary features into train ...")
@@ -55,8 +55,8 @@ def merge_aux_features():
                 os.unlink(tmp)
             raise
 
-    print(f"\nDone. Train now: {len(train_merged):,} rows × {len(train_merged.columns)} cols")
-    print(f"      Test now: {len(test_merged):,} rows × {len(test_merged.columns)} cols")
+    print(f"\nDone. Train now: {len(train_merged):,} rows x {len(train_merged.columns)} cols")
+    print(f"      Test now: {len(test_merged):,} rows x {len(test_merged.columns)} cols")
     print(f"      Added {len(aux_df.columns) - 1} auxiliary feature columns")
 
 

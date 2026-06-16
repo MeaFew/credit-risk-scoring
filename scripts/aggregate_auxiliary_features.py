@@ -204,7 +204,7 @@ def main():
     PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
     out_path = PROCESSED_DATA_DIR / "auxiliary_features.csv"
     merged.to_csv(out_path, index=False)
-    print(f"Saved {len(merged):,} rows × {len(merged.columns)} cols to {out_path}")
+    print(f"Saved {len(merged):,} rows x {len(merged.columns)} cols to {out_path}")
 
 
 if __name__ == "__main__":
