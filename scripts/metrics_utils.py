@@ -27,8 +27,9 @@ def find_best_model_path(models_dir, model_stem, best_name: str = "xgboost"):
     Resolution order (deterministic): for XGBoost prefer the native ``.json``
     checkpoint, for other models prefer ``.joblib``; then fall back to a
     ``{best_name}_risk_model.*`` naming convention, then to any
-    ``*_risk_model.*`` file in the directory. Centralized here so evaluate.py,
-    shap_analysis.py, and the dashboard all agree on the chosen file.
+    ``*_risk_model.*`` file in the directory. Currently used by evaluate.py;
+    shap_analysis.py and the dashboard keep their own loaders (which also need
+    the XGBoost-native vs joblib deserialization choice, not just the path).
 
     Returns the resolved Path, or raises FileNotFoundError.
     """
