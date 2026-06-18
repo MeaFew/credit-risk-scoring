@@ -19,7 +19,7 @@
 
 ## 项目简介
 
-基于 Kaggle Home Credit Default Risk 数据集的端到端信用风险评分管线。实现工业级特征工程（WOE/IV）、多模型对比（LR → RF → XGBoost → LightGBM）与生产级可解释性（SHAP）。
+基于 Kaggle Home Credit Default Risk 数据集的端到端信用风险评分管线。实现专业级特征工程（WOE/IV）、多模型对比（LR → RF → XGBoost → LightGBM）与SHAP 可解释性。
 
 ## 核心亮点
 
@@ -56,6 +56,7 @@ bash download_data.sh
 
 # 运行完整管线
 make all
+# Windows (无 GNU Make): python run_all.py
 
 # 或分步执行
 make preprocess
@@ -105,7 +106,7 @@ make verify
 | 竞赛中位数 | ~0.72–0.75 | Leaderboard 中位 |
 | 竞赛 Top 10% | ~0.795 | 多表特征 + 集成 |
 | **本方案（单表）** | **0.763** | WOE/IV + 目标编码 + XGBoost/LightGBM（5 折 CV） |
-| **本方案（多表）** | **0.783** | （预期值，需完整 Kaggle 辅助表数据） |
+| 本方案（多表，规划中） | ~0.78（预估） | 需完整辅助表数据；当前仓库仅实现单表 |
 
 > 注：竞赛 Private Leaderboard 已关闭。上述分数为真实 Kaggle 数据上的本地 5 折分层交叉验证（307,511 训练 / 48,744 测试）。多表结果需在 `make features` 前运行 `scripts/aggregate_auxiliary_features.py` 和 `scripts/merge_auxiliary_features.py`。
 
@@ -118,7 +119,7 @@ make verify
 | XGBoost | **0.762** | **0.394** | **0.525** |
 | LightGBM | **0.763** | **0.394** | **0.525** |
 
-> 数值来自单表特征（仅 application_train）的真实 Kaggle 数据（307,511 样本）5 折分层交叉验证。留出测试集（80/20 切分）AUC = **0.801**（XGBoost）。引入多表特征（bureau、previous_application 等）可通过运行辅助聚合脚本进一步提升 AUC。
+> 数值来自单表特征（仅 application_train）的真实 Kaggle 数据（307,511 样本）5 折分层交叉验证。application_train 内部 80/20 留出切分（非 Kaggle 未标注测试集）AUC = **0.801**（XGBoost）。引入多表特征（bureau、previous_application 等）可通过运行辅助聚合脚本进一步提升 AUC。
 
 ## 相关项目
 
@@ -127,6 +128,7 @@ make verify
 | 电商用户行为分析 | [Gitee](https://gitee.com/zeroonei1/shoplytics) | [GitHub](https://github.com/MeaFew/shoplytics) |
 | 营销归因与预算优化 | [Gitee](https://gitee.com/zeroonei1/attributor) | [GitHub](https://github.com/MeaFew/attributor) |
 | 多元时序预测 | [Gitee](https://gitee.com/zeroonei1/foresight) | [GitHub](https://github.com/MeaFew/foresight) |
+| 图神经网络反欺诈 | [Gitee](https://gitee.com/zeroonei1/graphguard) | [GitHub](https://github.com/MeaFew/graphguard) |
 
 ## 许可证
 

@@ -8,7 +8,7 @@
 
 ## Overview
 
-End-to-end credit risk scoring pipeline built on the Kaggle Home Credit Default Risk dataset. Implements industry-standard feature engineering (WOE/IV), model comparison (LR -> RF -> XGBoost -> LightGBM), and production-ready interpretability (SHAP).
+End-to-end credit risk scoring pipeline built on the Kaggle Home Credit Default Risk dataset. Implements professional-grade feature engineering (WOE/IV), model comparison (LR -> RF -> XGBoost -> LightGBM), and SHAP-based interpretability (SHAP).
 
 ## Key Highlights
 
@@ -90,7 +90,7 @@ Based on [Kaggle Home Credit Default Risk](https://www.kaggle.com/competitions/h
 | Competition Median | ~0.72-0.75 | Leaderboard median |
 | Competition Top 10% | ~0.795 | Multi-table features + ensemble |
 | **This Project (single-table)** | **0.763** | WOE/IV + target encoding + XGBoost/LightGBM (5-fold CV) |
-| **This Project (multi-table)** | **0.783** | (expected, requires full Kaggle data with auxiliary tables) |
+| This Project (multi-table, planned) | ~0.78 (projected) | Requires full auxiliary tables; this repo implements single-table only |
 
 > Note: Competition Private Leaderboard is closed. Scores above are from local 5-fold stratified cross-validation on real Kaggle data (307,511 train / 48,744 test). Multi-table results require running `scripts/aggregate_auxiliary_features.py` and `scripts/merge_auxiliary_features.py` before `make features`.
 
@@ -112,6 +112,7 @@ Based on [Kaggle Home Credit Default Risk](https://www.kaggle.com/competitions/h
 | E-commerce User Analytics | [MeaFew/shoplytics](https://github.com/MeaFew/shoplytics) | 29M real user behavior records, 10 analytical modules |
 | Marketing Attribution & MMM | [MeaFew/attributor](https://github.com/MeaFew/attributor) | MMM + multi-touch attribution + budget optimization |
 | Multivariate Time Series | [MeaFew/foresight](https://github.com/MeaFew/foresight) | LSTM / Transformer / XGBoost time series forecasting |
+| Graph Fraud Detection | [MeaFew/graphguard](https://github.com/MeaFew/graphguard) | GNN illicit transaction detection (Elliptic) |
 
 ## License
 
