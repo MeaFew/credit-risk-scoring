@@ -49,7 +49,7 @@ Thumbs.db
 .python-version
 
 # Data (large files — tracked via Git LFS if needed)
-data/raw/
+data/raw/*
 data/processed/
 data/external/
 *.csv
@@ -62,6 +62,7 @@ data/external/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/external/.gitkeep
+!data/raw/HomeCredit_columns_description.csv
 
 # Models / outputs
 models/
@@ -71,7 +72,6 @@ models/
 *.pth
 *.ckpt
 reports/*.json
-reports/*.md
 reports/*.html
 reports/checkpoints/
 images/*.png
