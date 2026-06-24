@@ -118,9 +118,7 @@ def main():
     X_encoded = preprocessor.transform(X_sample)
     feature_names = list(preprocessor.get_feature_names_out())
     if hasattr(X_encoded, "toarray"):  # sparse from any future one-hot step
-        X_encoded = pd.DataFrame(
-            X_encoded.toarray(), columns=feature_names, index=X_sample.index
-        )
+        X_encoded = pd.DataFrame(X_encoded.toarray(), columns=feature_names, index=X_sample.index)
     elif not isinstance(X_encoded, pd.DataFrame):
         # ColumnTransformer may hand back an object-dtyped ndarray when the
         # passthrough columns are pandas 'str' dtype. Coerce to a clean

@@ -206,7 +206,9 @@ def main():
         st.plotly_chart(fig, use_container_width=True)
 
         # Confusion matrix
-        threshold = results.get("oof_metrics", results.get("test_metrics", {})).get("threshold", 0.5)
+        threshold = results.get("oof_metrics", results.get("test_metrics", {})).get(
+            "threshold", 0.5
+        )
         y_pred = (y_proba >= threshold).astype(int)
         cm = pd.crosstab(y_eval, y_pred, rownames=["Actual"], colnames=["Predicted"])
         st.subheader("Confusion Matrix")

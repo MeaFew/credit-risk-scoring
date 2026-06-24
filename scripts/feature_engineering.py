@@ -177,9 +177,7 @@ def build_features(
     return train_out, test_out
 
 
-def compute_iv_report(
-    train_df: pd.DataFrame, target: str = TARGET_COL
-) -> pd.DataFrame:
+def compute_iv_report(train_df: pd.DataFrame, target: str = TARGET_COL) -> pd.DataFrame:
     """Compute the WOE/IV analytic report on the full training set.
 
     This is for **interpretation/reporting only** — it is NOT used to select

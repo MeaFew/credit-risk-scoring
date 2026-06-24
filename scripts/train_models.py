@@ -104,11 +104,7 @@ def make_pipeline(model_name: str, X: pd.DataFrame) -> Pipeline:
         )
     elif model_name == "lightgbm":
         clf = lgb.LGBMClassifier(
-            **{
-                k: v
-                for k, v in LGB_PARAMS.items()
-                if k not in ("early_stopping_rounds", "verbose")
-            }
+            **{k: v for k, v in LGB_PARAMS.items() if k not in ("early_stopping_rounds", "verbose")}
         )
     else:
         raise ValueError(f"Unknown model: {model_name}")
@@ -184,16 +180,12 @@ def retrain_best(model_name: str, X, y):
     if model_name == "xgboost":
         from sklearn.model_selection import train_test_split as _tts
 
-        X_rt, X_val, y_rt, y_val = _tts(
-            X, y, test_size=0.1, random_state=RANDOM_STATE, stratify=y
-        )
+        X_rt, X_val, y_rt, y_val = _tts(X, y, test_size=0.1, random_state=RANDOM_STATE, stratify=y)
         _eval_set_fit(pipeline, X_rt, y_rt, X_val, y_val)
     elif model_name == "lightgbm":
         from sklearn.model_selection import train_test_split as _tts
 
-        X_rt, X_val, y_rt, y_val = _tts(
-            X, y, test_size=0.1, random_state=RANDOM_STATE, stratify=y
-        )
+        X_rt, X_val, y_rt, y_val = _tts(X, y, test_size=0.1, random_state=RANDOM_STATE, stratify=y)
         _eval_set_fit(pipeline, X_rt, y_rt, X_val, y_val)
     else:
         pipeline.fit(X, y)
