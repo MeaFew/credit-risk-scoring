@@ -40,9 +40,6 @@ WOE_MAX_BINS = 10
 # IV threshold for feature selection
 IV_THRESHOLD = 0.02  # features with IV < 0.02 are considered weak
 
-# PSI threshold for stability monitoring
-PSI_THRESHOLD = 0.1  # Population Stability Index threshold for monitoring
-
 # ── Model hyperparameters (hand-tuned defaults; tune per dataset) ─
 XGB_PARAMS = {
     "objective": "binary:logistic",
