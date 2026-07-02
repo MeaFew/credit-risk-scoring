@@ -22,7 +22,10 @@ CLEANED_TRAIN_CSV = PROCESSED_DATA_DIR / "application_train_cleaned.csv"
 CLEANED_TEST_CSV = PROCESSED_DATA_DIR / "application_test_cleaned.csv"
 FEATURES_TRAIN_CSV = PROCESSED_DATA_DIR / "features_train.csv"
 FEATURES_TEST_CSV = PROCESSED_DATA_DIR / "features_test.csv"
-MODEL_PATH = MODELS_DIR / "xgb_risk_model"  # stem (no extension); use with .json or .joblib
+# Stem (no extension); the saved artifact is used with .joblib (or legacy .json).
+# Named generically because this stores whichever model won the CV comparison —
+# it may be XGBoost, LightGBM, RandomForest, or LogisticRegression, not only XGB.
+MODEL_PATH = MODELS_DIR / "risk_model"
 MODEL_RESULTS_JSON = REPORTS_DIR / "model_results.json"
 SHAP_SUMMARY_PNG = IMAGES_DIR / "shap_summary.png"
 

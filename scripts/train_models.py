@@ -76,11 +76,17 @@ def _split_cat_numeric(X: pd.DataFrame) -> tuple[list[str], list[str]]:
     return cat_cols, numeric_cols
 
 
-def make_pipeline(model_name: str, X: pd.DataFrame) -> Pipeline:
+def make_pipeline(model_name: str, X: pd.DataFrame, y: pd.Series | None = None) -> Pipeline:
     """Build a fresh ``TargetEncoder -> classifier`` pipeline for one model.
 
     A new pipeline (with fresh, unfitted steps) is created for each CV fold via
     this factory, so no fold inherits a partially-fit encoder from another.
+
+    When ``y`` is provided, the XGBoost/LightGBM ``scale_pos_weight`` is derived
+    from the actual training class balance (neg/pos) instead of the static value
+    in ``config`` — keeping it consistent with the ``class_weight="balanced"``
+    behavior used by the LogisticRegression/RandomForest pipelines. When ``y``
+    is None the static config value is used as a fallback.
     """
     cat_cols, numeric_cols = _split_cat_numeric(X)
     preprocessor = ColumnTransformer(
@@ -98,17 +104,35 @@ def make_pipeline(model_name: str, X: pd.DataFrame) -> Pipeline:
     elif model_name == "random_forest":
         clf = RandomForestClassifier(**RF_PARAMS)
     elif model_name == "xgboost":
-        clf = xgb.XGBClassifier(
-            **{k: v for k, v in XGB_PARAMS.items() if k not in ("early_stopping_rounds",)}
-        )
+        params = {k: v for k, v in XGB_PARAMS.items() if k not in ("early_stopping_rounds",)}
+        params["scale_pos_weight"] = _scale_pos_weight(y, params.get("scale_pos_weight"))
+        clf = xgb.XGBClassifier(**params)
     elif model_name == "lightgbm":
-        clf = lgb.LGBMClassifier(
-            **{k: v for k, v in LGB_PARAMS.items() if k not in ("early_stopping_rounds", "verbose")}
-        )
+        params = {k: v for k, v in LGB_PARAMS.items() if k not in ("early_stopping_rounds", "verbose")}
+        params["scale_pos_weight"] = _scale_pos_weight(y, params.get("scale_pos_weight"))
+        clf = lgb.LGBMClassifier(**params)
     else:
         raise ValueError(f"Unknown model: {model_name}")
 
     return Pipeline([("preprocess", preprocessor), ("model", clf)])
+
+
+def _scale_pos_weight(y: pd.Series | None, fallback) -> float:
+    """Compute scale_pos_weight = neg/pos from ``y`` for class-imbalance handling.
+
+    Returns the static ``fallback`` (from config) when ``y`` is None or when the
+    positive count is zero (degenerate split). This keeps the boosted-tree
+    pipelines consistent with the ``class_weight="balanced"`` setting used by the
+    LogisticRegression/RandomForest pipelines.
+    """
+    if y is None or len(y) == 0:
+        return fallback
+    counts = y.value_counts()
+    n_pos = int(counts.get(1, 0))
+    n_neg = int(counts.get(0, 0))
+    if n_pos <= 0:
+        return fallback
+    return n_neg / n_pos
 
 
 def _eval_set_fit(pipeline: Pipeline, X_train, y_train, X_val, y_val):
@@ -140,7 +164,7 @@ def cross_validate_model(model_name: str, X, y, cv=5):
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
         y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
 
-        pipeline = make_pipeline(model_name, X)
+        pipeline = make_pipeline(model_name, X, y=y_train)
         if use_early_stop:
             _eval_set_fit(pipeline, X_train, y_train, X_val, y_val)
         else:
@@ -175,7 +199,7 @@ def train_all(X, y):
 
 def retrain_best(model_name: str, X, y):
     """Retrain the best model's pipeline on the FULL training set for deployment."""
-    pipeline = make_pipeline(model_name, X)
+    pipeline = make_pipeline(model_name, X, y=y)
     if model_name == "xgboost":
         from sklearn.model_selection import train_test_split as _tts
 
