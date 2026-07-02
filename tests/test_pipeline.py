@@ -8,9 +8,6 @@ import pandas as pd
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-# scripts/ modules import their siblings as top-level names (e.g.
-# `from metrics_utils import ks_score`), so scripts/ itself must be importable.
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 from config import TARGET_COL
 from scripts.feature_engineering import build_features, compute_woe_iv
 from scripts.generate_mock_data import generate_application_train
@@ -231,8 +228,8 @@ class TestLeakagePrevention:
         y = (rng.random(n) < proba).astype(int)
         df = pd.DataFrame({"cat": cat, TARGET_COL: y})
 
-        enc1 = TargetEncoder(target_type="binary", random_state=0)
-        enc2 = TargetEncoder(target_type="binary", random_state=0)
+        enc1 = TargetEncoder(target_type="binary")
+        enc2 = TargetEncoder(target_type="binary")
         # Fit one encoder on the full set and another on only the first half.
         # If the encoder were not fold-dependent the two would agree; the point
         # of per-fold fitting is precisely that they differ. (We fit both to
@@ -275,7 +272,8 @@ class TestMetricHelpers:
     def test_ks_score_matches_scipy(self):
         """ks_score must equal scipy.stats.ks_2samp(pos, neg).statistic."""
         import scipy.stats as st
-        from metrics_utils import ks_score
+
+        from scripts.metrics_utils import ks_score
 
         rng = np.random.default_rng(0)
         y_true = np.array([1] * 100 + [0] * 100)
@@ -286,7 +284,7 @@ class TestMetricHelpers:
 
     def test_ks_score_perfect_separation_is_one(self):
         """When every positive outscores every negative, KS should be 1.0."""
-        from metrics_utils import ks_score
+        from scripts.metrics_utils import ks_score
 
         y_true = np.array([1, 1, 0, 0])
         y_proba = np.array([0.9, 0.8, 0.2, 0.1])
@@ -294,7 +292,7 @@ class TestMetricHelpers:
 
     def test_ks_score_identical_distributions_is_zero(self):
         """Same score distribution for both classes => KS = 0."""
-        from metrics_utils import ks_score
+        from scripts.metrics_utils import ks_score
 
         y_true = np.array([1, 1, 0, 0])
         y_proba = np.array([0.5, 0.5, 0.5, 0.5])

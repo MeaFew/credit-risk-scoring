@@ -36,8 +36,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import TargetEncoder
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from metrics_utils import ks_score
-
 from config import (
     FEATURES_TRAIN_CSV,
     LGB_PARAMS,
@@ -50,6 +48,7 @@ from config import (
     TARGET_COL,
     XGB_PARAMS,
 )
+from scripts.metrics_utils import ks_score
 
 # Silence only the noisy LightGBM/XGBoost fitting chatter, not genuine
 # convergence / deprecation warnings from sklearn (a blanket "ignore"
@@ -86,7 +85,7 @@ def make_pipeline(model_name: str, X: pd.DataFrame) -> Pipeline:
     cat_cols, numeric_cols = _split_cat_numeric(X)
     preprocessor = ColumnTransformer(
         transformers=[
-            ("te", TargetEncoder(target_type="binary", random_state=RANDOM_STATE), cat_cols),
+            ("te", TargetEncoder(target_type="binary"), cat_cols),
         ],
         remainder="passthrough",  # numeric cols pass through untouched
         verbose_feature_names_out=False,

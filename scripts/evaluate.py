@@ -36,8 +36,6 @@ from sklearn.metrics import (
 from sklearn.model_selection import StratifiedKFold
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from metrics_utils import ks_score
-
 from config import (
     FEATURES_TRAIN_CSV,
     IMAGES_DIR,
@@ -47,6 +45,7 @@ from config import (
     REPORTS_DIR,
     TARGET_COL,
 )
+from scripts.metrics_utils import ks_score
 
 
 def plot_roc_curve(y_true, y_proba, save_path: Path):
@@ -140,13 +139,13 @@ def produce_oof_predictions(model_name: str, X: pd.DataFrame, y: pd.Series, cv: 
     Each row's predicted probability therefore comes from a model that never
     saw that row — a faithful generalization estimate, not a resubstitution one.
     """
-    from train_models import make_pipeline
+    from scripts.train_models import make_pipeline
 
     skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=RANDOM_STATE)
     oof = np.full(len(X), np.nan, dtype=float)
     use_early_stop = model_name in ("xgboost", "lightgbm")
 
-    from train_models import _eval_set_fit
+    from scripts.train_models import _eval_set_fit
 
     for train_idx, val_idx in skf.split(X, y):
         X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]

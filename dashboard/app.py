@@ -27,6 +27,7 @@ from config import (
     IMAGES_DIR,
     MODEL_PATH,
     MODEL_RESULTS_JSON,
+    REPORTS_DIR,
     TARGET_COL,
 )
 
@@ -171,11 +172,26 @@ def main():
     elif page == "Score Distribution":
         st.header("Score Distribution")
 
-        model = load_model()
-        drop_cols = [c for c in ["SK_ID_CURR", TARGET_COL] if c in test_df.columns]
-        X_eval = test_df.drop(columns=drop_cols)
-        y_eval = test_df[TARGET_COL]
-        y_proba = model.predict_proba(X_eval)[:, 1]
+        # Home Credit application_test.csv has no TARGET column, so we cannot
+        # evaluate the test set by true labels. Use the leakage-free out-of-fold
+        # (OOF) predictions produced during evaluation instead: each training row
+        # is scored by a model that did not see it during fitting.
+        oof_path = REPORTS_DIR / "oof_predictions.npy"
+        if oof_path.exists() and TARGET_COL in train_df.columns:
+            y_eval = train_df[TARGET_COL]
+            y_proba = np.load(oof_path)
+            if len(y_proba) != len(y_eval):
+                st.warning(
+                    "OOF predictions do not match the training set size. "
+                    "Run `make evaluate` to regenerate them."
+                )
+                st.stop()
+        else:
+            st.warning(
+                "Score Distribution requires training labels and OOF predictions. "
+                "Run `make train evaluate` first."
+            )
+            st.stop()
 
         fig = go.Figure()
         fig.add_trace(
@@ -198,7 +214,7 @@ def main():
         )
         fig.update_layout(
             barmode="overlay",
-            title="Predicted Probability Distribution",
+            title="Predicted Probability Distribution (Out-of-Fold)",
             xaxis_title="Default Probability",
             yaxis_title="Count",
             template="plotly_white",

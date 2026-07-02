@@ -52,12 +52,23 @@ make dashboard
 提交前请确保通过以下检查:
 
 ```bash
-# Python lint
-ruff check scripts/ dashboard/ --ignore E501,F401,E402
+# Python lint (ignores are centralised in pyproject.toml)
+ruff check scripts/ tests/ dashboard/
 
 # 单元测试
 pytest tests/ -v
 ```
+
+## 脚本导入约定
+
+`scripts/` 已打包为 Python package (`scripts/__init__.py`)。脚本既可以作为 `__main__` 直接运行 (`python scripts/foo.py`)，也可以作为模块运行 (`python -m scripts.foo`)。`__main__` 模块无法使用相对导入，因此每个 CLI 脚本顶部保留一次 `sys.path.insert(0, project_root)`，随后通过 `scripts.` 命名空间导入同级模块，例如:
+
+```python
+from scripts.metrics_utils import ks_score
+from scripts.train_models import make_pipeline
+```
+
+请勿恢复旧的顶层 `from metrics_utils import ...` 写法，以免破坏 package 导入的一致性。
 
 ## 提交规范
 
